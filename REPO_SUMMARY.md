@@ -242,7 +242,7 @@ GitHub Actions configured to:
 ## 🔗 Integration Points
 
 All files reference proper upsell:
-- Error messages include `sales@crystalline.io`
+- Error messages include `[CONTACT_EMAIL]`
 - Docs reference tier comparison matrix
 - Examples show tier restrictions clearly
 - README has upsell badges

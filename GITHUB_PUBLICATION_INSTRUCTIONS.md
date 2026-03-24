@@ -61,11 +61,11 @@ After creation, GitHub will show:
 ```
 Quick setup — if you've done this kind of thing before
 
-https://github.com/ficklecreationstudios-boop/crystalline-tier1.git
+https://github.com/[USERNAME]/crystalline-tier1.git
 
 …or push an existing repository from the command line
 
-git remote add origin https://github.com/ficklecreationstudios-boop/crystalline-tier1.git
+git remote add origin https://github.com/[USERNAME]/crystalline-tier1.git
 git branch -M main
 git push -u origin main
 ```
@@ -87,7 +87,7 @@ Once you've created the repository on GitHub, come back here and:
 
 ```powershell
 # Set GitHub remote
-git remote add origin https://github.com/ficklecreationstudios-boop/crystalline-tier1.git
+git remote add origin https://github.com/[USERNAME]/crystalline-tier1.git
 
 # Rename branch to main (GitHub best practice)
 git branch -M main
@@ -211,7 +211,7 @@ git commit -m "Initial commit..."           # ✅ Done
 # → Create repo at https://github.com/new  # ← YOU DO THIS
 
 # What I'll do next:
-git remote add origin https://github.com/ficklecreationstudios-boop/crystalline-tier1.git
+git remote add origin https://github.com/[USERNAME]/crystalline-tier1.git
 git branch -M main
 git push -u origin main
 ```
@@ -231,8 +231,8 @@ When done, you should see:
 
 ---
 
-**Your GitHub username:** `ficklecreationstudios-boop`  
+**Your GitHub username:** `[USERNAME]`  
 **Repository name:** `crystalline-tier1`  
-**Final URL:** `https://github.com/ficklecreationstudios-boop/crystalline-tier1`
+**Final URL:** `https://github.com/[USERNAME]/crystalline-tier1`
 
 **Actions:** Ready to proceed once you create the GitHub repository! ✅

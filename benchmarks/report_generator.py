@@ -81,7 +81,7 @@ class BenchmarkReportGenerator:
         content.append("**Next Steps:**\n")
         content.append("- For GPU acceleration: Upgrade to Tier 2+ ($500/month)\n")
         content.append("- For domain-specific optimizations: See Tier 3 offerings\n")
-        content.append("- For enterprise features: Contact sales@crystalline.io\n\n")
+        content.append("- For enterprise features: Contact [SALES_EMAIL]\n\n")
         
         # Metadata
         content.append("---\n\n")
@@ -268,7 +268,7 @@ class BenchmarkReportGenerator:
             <li><strong>For Tier 1 users:</strong> CPU-based operations are suitable for learning and research</li>
             <li><strong>For GPU acceleration:</strong> Upgrade to Tier 2 ($500/month) for 20-100x speedup</li>
             <li><strong>For domain optimization:</strong> See Tier 3 for domain-specific wheels</li>
-            <li><strong>For production workloads:</strong> Contact sales@crystalline.io for enterprise solutions</li>
+            <li><strong>For production workloads:</strong> Contact [SALES_EMAIL] for enterprise solutions</li>
         </ul>
     </div>
     

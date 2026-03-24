@@ -21,7 +21,7 @@ setup(
     name="crystalline-tier1",
     version="5.0.0",
     author="Crystalline Project",
-    author_email="contact@crystalline.io",
+    author_email="[CONTACT_EMAIL]",
     description="Crystalline GPU - Tier 1 (Free, CPU-only edition)",
     long_description=long_description,
     long_description_content_type="text/markdown",

@@ -304,8 +304,8 @@ python report_generator.py
 
 ### 📞 CONTACT SALES FOR:
 
-- 💼 Tier 3 (Domain optimization, $100K+/year)
-- 👑 Tier 4 (Premium + Champion Mode, $300K+/year)
+- 💼 Tier 3 
+- 👑 Tier 4 
 - 🤝 Enterprise licensing options
 - 📋 Custom evaluation contracts
 - 🎯 Volume licensing
@@ -395,7 +395,7 @@ Action: Review tier comparison, ROI analysis
 ```
 Priority: LOW (if needed)
 Time: 1-2 hours
-Action: Contact sales@crystalline.io for enterprise options
+Action: Contact [CONTACT_EMAIL] for enterprise options
 ```
 
 ---
@@ -446,7 +446,7 @@ Action: Contact sales@crystalline.io for enterprise options
 - 🔧 Edit: `comprehensive_benchmark.py` (configuration)
 
 **For Production Deployment:**
-- 📧 Contact: sales@crystalline.io
+- 📧 Contact: [CONTACT_EMAIL]
 - 🚀 Request: GPU tier benchmarks
 - 💼 Discuss: Licensing options
 

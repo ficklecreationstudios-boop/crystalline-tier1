@@ -246,9 +246,9 @@ START                 TIER LADDER                        ENTERPRISE
 | Tier | Use Case | Contact |
 |------|----------|---------|
 | Tier 1 | Learning | GitHub (free) |
-| Tier 2 | Professional GPU | sales@crystalline.io |
-| Tier 3 | Enterprise Domain | sales@crystalline.io |
-| Tier 4 | Premium Production | sales@crystalline.io |
+| Tier 2 | Professional GPU | [SALES_EMAIL] |
+| Tier 3 | Enterprise Domain | [SALES_EMAIL] |
+| Tier 4 | Premium Production | [SALES_EMAIL] |
 
 ---
 
@@ -414,7 +414,7 @@ Everything has been:
 | Visual presentation | Open benchmark_report.html |
 | Raw data analysis | Use benchmark_results.json |
 | Extend benchmarks | Edit comprehensive_benchmark.py |
-| Sales inquiry | Email sales@crystalline.io |
+| Sales inquiry | Email [SALES_EMAIL] |
 
 ---
 

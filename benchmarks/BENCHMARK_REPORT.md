@@ -106,9 +106,9 @@ Crystalline GPU Tier 1 provides:
 - ✅ Open-source GPL-3.0 license
 
 **Next Steps:**
-- For GPU acceleration: Upgrade to Tier 2+ ($500/month)
+- For GPU acceleration: Upgrade to Tier 2+ 
 - For domain-specific optimizations: See Tier 3 offerings
-- For enterprise features: Contact sales@crystalline.io
+- For enterprise features: Contact [CONTACT_EMAIL]
 
 ---
 

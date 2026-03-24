@@ -148,17 +148,17 @@ python report_generator.py
 
 **Current Tier 1 → Tier 2 (GPU):**
 - Expected speedup: 20-100x for suitable workloads
-- Cost: $500/month
+- h
 - Use cases: Professional GPU-accelerated computing
 
 **Tier 1 → Tier 3 (Domain Wheels):**
 - Expected speedup: 50-500x for optimized domains
-- Cost: $100K+/year
+- 
 - Use cases: Enterprise finance, pharma, energy
 
 **Tier 1 → Tier 4 (Premium):**
 - Expected speedup: 100-3000x with optimizations
-- Cost: $300K+/year  
+-  
 - Use cases: Production systems, intensive workloads
 
 ---
@@ -368,7 +368,7 @@ d:\crystalline-tier1-open\benchmarks\
 
 ### For Tier 2+ Consideration
 
-1. 📧 Contact sales@crystalline.io
+1. 📧 Contact [SALES_EMAIL]
 2. 💻 Request GPU benchmark suite
 3. 📊 Compare Tier 2 vs Tier 1 speedups
 4. 💰 Evaluate cost/benefit analysis
@@ -386,7 +386,7 @@ d:\crystalline-tier1-open\benchmarks\
 
 - **GitHub Issues:** [crystalline-tier1/issues](https://github.com)
 - **Documentation:** [./README.md](./README.md)
-- **Commercial:** sales@crystalline.io
+- **Commercial:** [CONTACT_EMAIL]
 - **Community:** GitHub Discussions
 
 ---

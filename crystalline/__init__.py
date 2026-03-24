@@ -41,7 +41,7 @@ if _tier_info not in ["TIER_1_FREE", "TIER_1"]:
     warnings.warn(
         f"WARNING: Crystalline-tier1 is Tier 1 (CPU-only). "
         f"Higher tier features (GPU, Champion Mode) are not available. "
-        f"For GPU acceleration, please purchase Tier 2+ at https://crystalline.io/tiers",
+        f"For GPU acceleration, please purchase Tier 2+ at https://[DOMAIN]/tiers",
         RuntimeWarning,
         stacklevel=2
     )

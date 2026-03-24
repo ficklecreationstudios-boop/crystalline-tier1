@@ -74,7 +74,7 @@ def check_tier_access(feature_name):
             f"  - Tier 2: GPU acceleration ($500/month)\n"
             f"  - Tier 3: Domain wheels ($100K+/year)\n"
             f"  - Tier 4: Champion Mode ($300K+/year)\n"
-            f"Contact sales@crystalline.io for commercial licensing."
+            f"Contact [SALES_EMAIL] for commercial licensing."
         )
     
     return True

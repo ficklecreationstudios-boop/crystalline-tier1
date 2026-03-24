@@ -80,15 +80,15 @@ See [LICENSE](./LICENSE) for details.
 
 ### For Higher Tiers:
 
-- **Tier 2** (GPU) - Commercial: Contact sales@crystalline.io
-- **Tier 3** (Domain Wheels) - Enterprise: Contact sales@crystalline.io  
-- **Tier 4** (Champion Mode) - Premium: Contact sales@crystalline.io
+- **Tier 2** (GPU) - Commercial: Contact [SALES_EMAIL]
+- **Tier 3** (Domain Wheels) - Enterprise: Contact [SALES_EMAIL]  
+- **Tier 4** (Champion Mode) - Premium: Contact [SALES_EMAIL]
 
 ## Support
 
 - **Issues**: [GitHub Issues](https://github.com/yourusername/crystalline-tier1/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/yourusername/crystalline-tier1/discussions)
-- **Commercial Support**: sales@crystalline.io
+- **Commercial Support**: [CONTACT_EMAIL]
 
 ## Contributing
 
@@ -104,7 +104,7 @@ Contributions are welcome! Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for g
 
 ## Disclaimer
 
-This Tier 1 edition is provided AS-IS for educational and research purposes. For production GPU-accelerated workloads, see [Tier 2+ licensing](https://crystalline.io).
+This Tier 1 edition is provided AS-IS for educational and research purposes. For production GPU-accelerated workloads, see [Tier 2+ licensing](TIER2_INFO).
 
 ---
 

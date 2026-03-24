@@ -84,7 +84,7 @@ Error message:
 ```
 TierFeatureBlockedError: GPU acceleration is not available in Tier 1 (free edition). 
 For GPU support, please upgrade to Tier 2+. 
-Visit https://crystalline.io/tiers for details or contact sales@crystalline.io
+Contact [CONTACT_EMAIL]
 ```
 
 ## Examples
@@ -143,7 +143,7 @@ print(f"Tier: {backend.tier}")
 
 **Problem**: You're trying to use GPU or higher-tier features.
 
-**Solution**: These require paid tiers. Contact sales@crystalline.io or visit https://crystalline.io/tiers.
+**Solution**: These require paid tiers. Contact [CONTACT_EMAIL]
 
 ### ImportError
 
@@ -175,7 +175,7 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md) for guidelines.
 
 - **Issues**: [GitHub Issues](https://github.com/yourusername/crystalline-tier1/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/yourusername/crystalline-tier1/discussions)
-- **Commercial**: sales@crystalline.io
+- **Commercial**: [CONTACT_EMAIL]
 
 ## Next Steps
 

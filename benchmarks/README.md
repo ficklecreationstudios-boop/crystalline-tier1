@@ -294,7 +294,7 @@ pip install scikit-learn torch tensorflow
 
 - **Issues**: Open an issue on GitHub
 - **Questions**: Check examples/ for usage
-- **Enterprise**: Contact sales@crystalline.io
+- **Enterprise**: Contact [CONTACT_EMAIL]
 
 ---
 

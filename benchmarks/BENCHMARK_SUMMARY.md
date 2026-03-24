@@ -307,21 +307,21 @@ Tier 1 (Current - FREE)
 ├─ Crystalline ≈ NumPy/SciPy
 └─ Suitable for learning/research
 
-        ↓ Upgrade ($500/mo)
+        ↓ Upgrade 
 
 Tier 2 (GPU Acceleration)
 ├─ 20-100x speedup on suitable workloads
 ├─ CUDA/ROCm/oneAPI backends
 └─ Professional GPU support
 
-        ↓ Upgrade ($100K+/year)
+        ↓ Upgrade 
 
 Tier 3 (Domain Wheels)
 ├─ 50-500x speedup for specific domains
 ├─ Finance, Pharma, Energy, etc.
 └─ Enterprise support
 
-        ↓ Upgrade ($300K+/year)
+        ↓ Upgrade 
 
 Tier 4 (Premium)
 ├─ 100-3000x production optimization
@@ -394,4 +394,4 @@ Tier 4 (Premium)
 **Crystalline GPU Version:** 5.0.0-tier1  
 **License:** GPL-3.0
 
-For more information: https://github.com/yourusername/crystalline-tier1
+For more information: https://github.com/[USERNAME]/crystalline-tier1

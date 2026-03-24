@@ -249,7 +249,7 @@ pip install numpy scipy
 To access higher-tier features:
 
 1. Visit https://crystalline.io/tiers
-2. Contact sales@crystalline.io
+2. Contact [SALES_EMAIL]
 3. Reference the tier feature matrix above
 
 ## License

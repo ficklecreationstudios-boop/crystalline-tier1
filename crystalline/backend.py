@@ -124,7 +124,7 @@ class GPUBackend:
         raise TierFeatureBlockedError(
             "GPU acceleration is not available in Tier 1 (free edition). "
             "For GPU support, please upgrade to Tier 2+. "
-            "Visit https://crystalline.io/tiers for details or contact sales@crystalline.io"
+            "Visit https://[DOMAIN]/tiers for details or contact [SALES_EMAIL]"
         )
 
 # Global backend instance

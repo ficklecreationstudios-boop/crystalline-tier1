@@ -148,7 +148,7 @@ By contributing, you agree that your contributions will be licensed under GPL-3.
 
 - Open an issue
 - Start a discussion
-- Email: contact@crystalline.io
+- Email: [CONTACT_EMAIL]
 
 ---
 
