@@ -1,0 +1,20 @@
+# Crystalline GPU - Tier 1 (Free Edition) Requirements
+# Python 3.10+ required
+
+# Core Dependencies
+numpy>=1.19.0
+scipy>=1.5.0
+
+# Network & Configuration
+requests>=2.25.0
+pyyaml>=5.4.0
+
+# Optional: Visualization (for tutorials and examples)
+# matplotlib>=3.3.0
+# TensorBoard>=2.4.0
+
+# Optional: Development & Testing
+# pytest>=7.0.0
+# pytest-cov>=3.0.0
+# black>=22.0.0
+# flake8>=4.0.0
