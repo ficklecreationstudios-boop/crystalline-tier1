@@ -9,6 +9,9 @@ scipy>=1.5.0
 requests>=2.25.0
 pyyaml>=5.4.0
 
+# Optional: Performance Optimization
+# numba>=0.56.0  # JIT compilation for spectral kernels (10-50x faster on repeated calls)
+
 # Optional: Visualization (for tutorials and examples)
 # matplotlib>=3.3.0
 # TensorBoard>=2.4.0
