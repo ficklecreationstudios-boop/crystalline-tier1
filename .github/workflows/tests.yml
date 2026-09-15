@@ -15,10 +15,10 @@ jobs:
         python-version: ['3.10', '3.11', '3.12']
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v7
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v7
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -39,10 +39,10 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v7
 
     - name: Set up Python 3.12
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v7
       with:
         python-version: '3.12'
 
@@ -53,17 +53,46 @@ jobs:
 
     - name: Install wheel into isolated environment
       run: |
-        python -m venv .benchmark-venv
-        . .benchmark-venv/bin/activate
+        python -m venv .wheel-venv
+        . .wheel-venv/bin/activate
         python -m pip install dist/*.whl
-        python -c "import crystalline; print(crystalline.__version__); print(crystalline.get_tier_info())"
-
-    - name: Verify installed package boundary
-      run: |
-        . .benchmark-venv/bin/activate
         python - <<'PY'
+        import importlib.metadata
         import pathlib
         import crystalline
+
+        metadata = importlib.metadata.metadata("crystalline-tier1")
+        assert crystalline.__version__ == "5.0.1"
+        assert metadata["License-Expression"] == "GPL-3.0-only"
+        print(crystalline.__version__)
+        print(crystalline.get_tier_info())
+        print("License-Expression:", metadata["License-Expression"])
+
+        root = pathlib.Path(crystalline.__file__).resolve().parent
+        files = sorted(p.relative_to(root).as_posix() for p in root.rglob('*') if p.is_file())
+        print('\n'.join(files))
+        assert all(not path.startswith(('tests/', 'docs/', 'benchmarks/', 'examples/')) for path in files)
+        assert (root / 'backend.py').is_file()
+        assert (root / 'api.py').is_file()
+        PY
+
+    - name: Install source distribution into separate isolated environment
+      run: |
+        python -m venv .sdist-venv
+        . .sdist-venv/bin/activate
+        python -m pip install dist/*.tar.gz
+        python - <<'PY'
+        import importlib.metadata
+        import pathlib
+        import crystalline
+
+        metadata = importlib.metadata.metadata("crystalline-tier1")
+        assert crystalline.__version__ == "5.0.1"
+        assert metadata["License-Expression"] == "GPL-3.0-only"
+        print(crystalline.__version__)
+        print(crystalline.get_tier_info())
+        print("License-Expression:", metadata["License-Expression"])
+
         root = pathlib.Path(crystalline.__file__).resolve().parent
         files = sorted(p.relative_to(root).as_posix() for p in root.rglob('*') if p.is_file())
         print('\n'.join(files))
@@ -74,11 +103,12 @@ jobs:
 
     - name: Run reproducible benchmark after correctness gate
       run: |
-        . .benchmark-venv/bin/activate
+        . .wheel-venv/bin/activate
         python benchmarks/advanced_baseline_comparison.py | tee benchmark-output.txt
 
     - name: Upload benchmark evidence
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: crystalline-tier1-benchmark
         path: benchmark-output.txt
+        if-no-files-found: error
