@@ -8,6 +8,7 @@ import numpy as np
 from scipy import signal
 
 from crystalline.backend import CPUBackend
+from crystalline.kernels import spectral as kernel_spectral
 
 
 backend = CPUBackend()
@@ -60,6 +61,19 @@ def test_spectral_analysis_rejects_invalid_sampling_rate():
             raise AssertionError("non-positive sampling rates must be rejected")
 
 
+def test_spectral_filtering_matches_scipy():
+    rng = np.random.default_rng(2026)
+    data = rng.normal(size=256)
+    cutoff = 0.2
+    order = 4
+
+    actual = backend.spectral_filtering(data, cutoff, order=order, btype="low")
+    b, a = signal.butter(order, cutoff, btype="low")
+    expected = signal.filtfilt(b, a, data)
+
+    np.testing.assert_allclose(actual, expected, rtol=1e-13, atol=1e-13)
+
+
 def test_convolution_stride_is_applied():
     data = np.arange(8, dtype=float)
     kernel = np.array([1.0, 2.0, 1.0])
@@ -81,3 +95,26 @@ def test_convolution_rejects_nonpositive_stride():
             pass
         else:
             raise AssertionError("stride must be a positive integer")
+
+
+def test_experimental_spectral_helper_matches_scipy():
+    rng = np.random.default_rng(7)
+    data = rng.normal(size=127)
+    fs = 50.0
+
+    actual_freqs, actual_psd = kernel_spectral.spectral_analysis(
+        data, fs=fs, window="hamming"
+    )
+    expected_freqs, expected_psd = _scipy_periodogram(data, fs, "hamming")
+
+    np.testing.assert_allclose(actual_freqs, expected_freqs, rtol=0.0, atol=1e-14)
+    np.testing.assert_allclose(actual_psd, expected_psd, rtol=1e-12, atol=1e-14)
+
+
+def test_experimental_rfft_rejects_empty_signal():
+    try:
+        kernel_spectral.rfft(np.array([]))
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("empty FFT input must be rejected")
