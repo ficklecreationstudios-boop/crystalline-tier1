@@ -83,5 +83,4 @@ smoothed = backend.convolution(signal, kernel, padding=1)
 print("Smoothed:", smoothed)
 
 print("\n✅ All operations completed!")
-print("💡 Tier 1 uses NumPy/SciPy for efficient CPU computation")
-print("   For GPU acceleration, upgrade to Tier 2+")
+print("💡 Tier 1 uses NumPy/SciPy for CPU computation")
