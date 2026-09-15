@@ -5,7 +5,7 @@ import pytest
 import numpy as np
 from crystalline import get_backend, spectral_analysis, spectral_filtering
 from crystalline.licensing import check_tier_access, TierFeatureBlockedError, get_tier
-from crystalline.backend import GPUBackend
+from crystalline.backend import GPUBackend, set_backend
 
 
 class TestTierEnforcement:
@@ -32,6 +32,11 @@ class TestTierEnforcement:
         """GPU backend constructor should raise error."""
         with pytest.raises(TierFeatureBlockedError):
             GPUBackend()
+
+    def test_non_cpu_backend_dispatch_is_blocked(self):
+        """Backend selection must not silently fall back from a GPU request."""
+        with pytest.raises(TierFeatureBlockedError):
+            set_backend("gpu")
 
 
 class TestBackend:
