@@ -4,16 +4,20 @@
 
 ### Installation
 
-```bash
-pip install crystalline-tier1
-```
+This repository is currently documented and validated as a source distribution; it does not make a public PyPI availability claim.
 
-Or from source:
+From a local checkout:
 
 ```bash
 git clone https://github.com/ficklecreationstudios-boop/crystalline-tier1.git
 cd crystalline-tier1
-pip install -e .
+pip install .
+```
+
+For development, including development dependencies:
+
+```bash
+pip install -e ".[dev]"
 ```
 
 ### Basic Usage
@@ -107,11 +111,9 @@ GPU and other higher-tier features are intentionally unavailable in this distrib
 
 ### ImportError
 
-Install the package and its runtime dependencies:
+Install the package from a local source checkout as described above, or install its runtime dependencies directly when working without an installed package:
 
 ```bash
-pip install crystalline-tier1
-# or
 pip install numpy scipy
 ```
 
