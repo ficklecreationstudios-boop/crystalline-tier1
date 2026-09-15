@@ -1,5 +1,9 @@
 """Independent checks for package/runtime metadata consistency."""
 
+import os
+import subprocess
+import sys
+
 import crystalline
 
 
@@ -8,13 +12,21 @@ def test_runtime_version_matches_published_package_version():
     assert crystalline.get_tier_info()["version"] == crystalline.__version__
 
 
-def test_import_does_not_mutate_tier_environment(monkeypatch):
-    # The package must not rewrite process-wide environment variables merely by
-    # being imported. Feature availability is enforced by the runtime guard.
-    monkeypatch.setenv("CRYSTALLINE_TIER", "caller-controlled")
-    monkeypatch.setenv("CRYSTALLINE_SKIP_LICENSE_VALIDATION", "caller-controlled")
+def test_import_does_not_mutate_tier_environment():
+    env = os.environ.copy()
+    env["CRYSTALLINE_TIER"] = "caller-controlled"
+    env["CRYSTALLINE_SKIP_LICENSE_VALIDATION"] = "caller-controlled"
 
-    # Import has already occurred for this test process; the assertion locks in
-    # the absence of import-time environment mutation for the current module.
-    assert __import__("os").environ["CRYSTALLINE_TIER"] == "caller-controlled"
-    assert __import__("os").environ["CRYSTALLINE_SKIP_LICENSE_VALIDATION"] == "caller-controlled"
+    code = (
+        "import os, crystalline; "
+        "assert os.environ['CRYSTALLINE_TIER'] == 'caller-controlled'; "
+        "assert os.environ['CRYSTALLINE_SKIP_LICENSE_VALIDATION'] == 'caller-controlled'"
+    )
+    result = subprocess.run(
+        [sys.executable, "-c", code],
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
