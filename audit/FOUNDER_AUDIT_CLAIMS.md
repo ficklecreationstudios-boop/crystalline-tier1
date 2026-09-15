@@ -29,15 +29,15 @@ Every public claim must be one of:
 | Production readiness is established by historical timings | Unsupported | Removed. |
 | Package metadata can drift between `setup.py` and `pyproject.toml` | Prevented | `setup.py` is now a metadata-free compatibility shim; `pyproject.toml` is the single metadata source. |
 | Installed package contains repository-only test/docs/example artifacts | Prevented and CI-checked | Explicit setuptools discovery excludes those directories; CI builds and installs the wheel into an isolated environment and verifies the installed boundary. |
-| Public examples reflect the current API | Verified after correction | Examples were audited; the spectral example now handles optional plotting correctly and displays the full PSD range; the linear-algebra example no longer advertises an unsupported higher-tier upgrade. All four examples now have CI smoke coverage. |
-| Reproducible spectral performance advantage exists | Benchmark-specific | CI run `34982984562` measured Crystalline at 0.087 ms vs 0.311 ms median for 1,024 samples, 0.346 ms vs 1.427 ms for 10,240, and 5.180 ms vs 16.558 ms for 102,400 against equivalent SciPy periodogram semantics. |
-| Matrix multiplication is independently accelerated | Unsupported | CI benchmark measured approximately parity with NumPy at 256² and 1024²; no acceleration claim is made. |
+| Public examples reflect the current API | Verified after correction | Examples were audited; the spectral example handles optional plotting correctly and displays the full PSD range; the linear-algebra example no longer advertises an unsupported higher-tier upgrade. All four examples have CI smoke coverage, including Windows console execution. |
+| Reproducible spectral performance advantage exists | Benchmark-specific | Latest green CI run `34987294718` measured Crystalline median times of 0.046 ms, 0.214 ms, and 3.709 ms for 1,024, 10,240, and 102,400 samples versus 0.198 ms, 1.005 ms, and 11.944 ms for equivalent SciPy periodogram semantics. |
+| Matrix multiplication is independently accelerated | Unsupported | Latest CI benchmark measured approximately parity with NumPy at 256² and 1024²; no acceleration claim is made. |
 
 ## Benchmark gate
 
 The replacement benchmark compares equivalent mathematical operations. Raw FFT timings are not used as evidence for a PSD API because they omit windowing and PSD density normalization.
 
-The first reproducible CI benchmark completed successfully only after the full 3-OS × 3-Python correctness matrix passed. Its artifact is retained by GitHub Actions for provenance. The benchmark is evidence for the tested CI environment and workloads only; it does not establish universal acceleration.
+The latest reproducible CI benchmark completed successfully only after the full 3-OS × 3-Python correctness matrix passed. Run `34987294718` also completed the isolated wheel/sdist packaging checks and benchmark. Its benchmark artifact is retained by GitHub Actions for provenance. The artifact digest is `sha256:0c792847d30717bfab19e7f3b50e88e959597be74c085ba4133fc3b69bd72096`. The benchmark is evidence for the tested CI environment and workloads only; it does not establish universal acceleration.
 
 ## Remediation principle
 
