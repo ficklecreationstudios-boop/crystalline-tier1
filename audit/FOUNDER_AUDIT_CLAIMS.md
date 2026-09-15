@@ -13,6 +13,7 @@ Every public claim must be one of:
 - **Benchmark-specific:** supported only for a named operation, environment, and methodology.
 - **Unavailable:** explicitly outside Tier 1 scope.
 - **Historical:** retained for provenance but not presented as a current capability.
+- **Intended architecture:** a product-tier requirement that is not evidence of implementation in this Tier 1 repository.
 
 ## Dispositions
 
@@ -24,11 +25,14 @@ Every public claim must be one of:
 | Filtering accepts physical Hz cutoffs | Unsupported by the API | Corrected documentation/examples to normalized SciPy cutoffs because no sampling-frequency parameter exists. |
 | Experimental spectral helper is a faster optimized path | Unsupported | Removed performance positioning; kept it source-visible and correctness-aligned. |
 | Tier 1 is universally faster / 10x faster / within 10–20% | Unsupported | Removed from current public positioning; historical artifacts quarantined. |
-| Tier 1 has GPU execution | False | Explicitly unavailable. `GPUBackend` is a blocking placeholder; `get_backend()` and `set_backend()` dispatch only to the CPU backend. |
-| Repository contains a Numba CUDA/JIT execution path | False | No current Tier 1 Numba import, dependency, JIT decorator, CUDA kernel, or dispatch path was found. Requirements now state this explicitly. |
+| Tier 1 has GPU execution | False for this distribution | Explicitly unavailable. `GPUBackend` is a blocking placeholder; `get_backend()` and `set_backend()` dispatch only to the CPU backend. |
+| Tier 4 is intended to unlock GPU + JIT + Champion Mode | Intended architecture | This is a product-tier requirement, not a Tier 1 implementation claim. The current Tier 1 repository does not contain the Tier 4 runtime. |
+| Current repository implements Tier 4 | Unsupported | No Tier 4 runtime, backend, or tier-specific executable package was found in the remediation tree. Do not imply Tier 4 is shipped by this repository. |
+| Historical frozen code contained optional Numba JIT | Historical / partially implemented | The frozen `fa7ad15` spectral helper imported optional Numba and defined JIT window kernels, but the public backend did not expose a Tier 4 runtime and the helper had incorrect/unsupported performance semantics. The remediation branch removed this dead optional path rather than treating it as Tier 4 evidence. |
+| Repository contains a Numba CUDA/JIT execution path today | False | No current Tier 1 Numba import, dependency, JIT decorator, CUDA kernel, or dispatch path was found. Requirements state this explicitly. |
 | Repository contains a CuPy execution path | False | No current Tier 1 CuPy dependency, import, backend, or dispatch path was found. |
-| PyTorch provides a Crystalline GPU execution path | False | PyTorch appears only as an optional historical/current benchmark comparator. The current reproducible benchmark uses CPU PyTorch operations when installed and does not dispatch Crystalline operations through PyTorch or CUDA. |
-| Historical benchmark scripts prove GPU execution | False | Historical scripts were reviewed and found to benchmark CPU implementations/comparators; archive status is retained and GPU conclusions remain quarantined. |
+| PyTorch provides a Crystalline GPU execution path | False | PyTorch appears only as an optional benchmark comparator. The current reproducible benchmark uses CPU PyTorch operations when installed and does not dispatch Crystalline operations through PyTorch or CUDA. |
+| Historical benchmark scripts prove GPU execution | False | Historical scripts benchmark CPU implementations/comparators; archive status is retained and GPU conclusions remain quarantined. |
 | Higher-tier prices/performance targets are established by this repository | Unsupported | Removed from Tier 1 documentation. |
 | Production readiness is established by historical timings | Unsupported | Removed. |
 | Package metadata can drift between `setup.py` and `pyproject.toml` | Prevented | `setup.py` is now a metadata-free compatibility shim; `pyproject.toml` is the single metadata source. |
@@ -44,15 +48,22 @@ The remediation branch was traced across its repository tree and executable sour
 1. `crystalline.backend.CPUBackend` implements every available Tier 1 operation with NumPy/SciPy.
 2. `crystalline.backend.GPUBackend` is a deliberate blocking placeholder that raises `TierFeatureBlockedError` on construction.
 3. `get_backend()` always returns `CPUBackend`; `set_backend()` rejects every backend name other than `cpu`.
-4. `crystalline.licensing.TIER_FEATURES` explicitly marks `gpu_acceleration` and `jit_compilation` false.
+4. `crystalline.licensing.TIER_FEATURES` explicitly marks `gpu_acceleration`, `champion_mode`, and `jit_compilation` false for Tier 1.
 5. `crystalline.get_tier_info()` reports `gpu_available=False` and `jit_available=False`.
 6. `crystalline/kernels/` is a CPU kernel inventory; its unavailable inventory explicitly lists GPU operations as not implemented.
 7. `crystalline/kernels/spectral.py` contains NumPy/SciPy CPU helpers only. There is no current Numba decorator, CUDA kernel, CuPy array path, PyTorch dispatch, or device-selection logic.
-8. `requirements.txt` contains only NumPy/SciPy runtime dependencies; it now explicitly states that Numba is not used by the current implementation.
+8. `requirements.txt` contains only NumPy/SciPy runtime dependencies; it explicitly states that Numba is not used by the current implementation.
 9. PyTorch is imported only conditionally by the reproducible benchmark as an external comparator. Its current benchmark uses CPU tensors and explicitly omits raw PyTorch FFT as a non-equivalent PSD comparison.
-10. The historical benchmark archive contains older CPU comparison code and stale naming such as “Crystalline GPU Tier 1”; those artifacts are quarantined for provenance and are not current runtime evidence.
+10. Historical frozen commit `fa7ad15` did contain optional CPU Numba JIT window helpers, but those helpers were not a GPU backend, were not wired as a Tier 4 runtime, and did not establish a GPU execution claim. The frozen commit's own message also described the work as Tier 1 optimization.
+11. The repository's initial release commit described itself as “Crystalline GPU Tier 1,” but its backend still explicitly blocked GPU execution. That name is therefore historical branding, not evidence of a shipped GPU runtime.
 
-Therefore there is **no latent GPU backend in the current branch that can honestly be called E2E-tested**. A real GPU E2E program would require a new implementation, dependency/toolchain policy, backend dispatch, numerical parity tests, GPU-capable CI/test infrastructure, and independent GPU benchmarks before GPU support could be claimed.
+### Correct architectural interpretation
+
+The intended product architecture can legitimately reserve GPU, JIT specialization, and Champion Mode for Tier 4. Tier 1 should therefore remain CPU-only and should reject those features. The audit must not collapse the intended Tier 4 contract into the Tier 1 implementation question.
+
+The remaining Tier 4 question is separate: **where is the Tier 4 implementation, and does it actually exist anywhere in the product/repository lineage?** This Tier 1 repository does not answer that question. A Tier 4 claim requires the corresponding implementation or a separate Tier 4 repository/package to be identified and independently tested.
+
+A real Tier 4 E2E program would require, at minimum, a real accelerator backend, explicit device dispatch, JIT compilation behavior, Champion Mode semantics, CPU/GPU numerical parity tests, dependency/toolchain policy, GPU-capable CI/test infrastructure, and independent GPU/JIT performance benchmarks. Numba's current CUDA architecture is one possible implementation route, but it requires an NVIDIA CUDA environment and current `numba-cuda` tooling; it should not be assumed to be the intended implementation without evidence. citeturn0search0turn0search1
 
 ## Benchmark gate
 
