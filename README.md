@@ -26,23 +26,21 @@ Crystalline Tier 1 is the free, open-source edition. It provides a small Python 
 - Domain-specific wheels
 - Commercial or enterprise licensing/support features
 
-Higher-tier availability should be treated as a separate product offering; this repository does not implement those features.
+No higher-tier runtime is implemented by this repository.
 
 ## Installation
 
-### From PyPI
-
-```bash
-pip install crystalline-tier1
-```
-
 ### From source
+
+The repository is the authoritative installation path for the current remediation state:
 
 ```bash
 git clone https://github.com/ficklecreationstudios-boop/crystalline-tier1.git
 cd crystalline-tier1
 pip install -e .
 ```
+
+A PyPI installation command is intentionally not advertised here because a public PyPI release was not verified during this audit.
 
 ## System requirements
 
@@ -76,7 +74,7 @@ print(freqs.shape, psd.shape)
 
 The repository contains independent numerical tests under `tests/`. These compare core results against established NumPy/SciPy reference behavior rather than benchmarking the implementation against itself.
 
-Performance claims should be treated as benchmark-specific. The historical benchmark artifacts in `benchmarks/` are retained for auditability and are not a basis for a blanket speed-up claim.
+Performance claims should be treated as benchmark-specific. Historical benchmark artifacts in `benchmarks/` are retained for auditability and are not a basis for a blanket speed-up claim. The current CI workflow also runs a reproducible benchmark only after the cross-platform correctness matrix passes; its results are evidence for the tested environment and workloads only.
 
 ## Licensing
 
@@ -91,9 +89,9 @@ Please use [GitHub Issues](https://github.com/ficklecreationstudios-boop/crystal
 - [x] Core spectral analysis
 - [x] CPU-based linear algebra
 - [x] Independent numerical correctness checks
-- [ ] Reproducible benchmark suite and methodology
-- [ ] Expanded usage examples
-- [ ] Broader numerical test coverage
+- [x] Reproducible benchmark suite and methodology
+- [x] Expanded usage examples
+- [x] Broader numerical test coverage
 
 ## Disclaimer
 
