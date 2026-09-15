@@ -34,3 +34,51 @@ jobs:
     - name: Critical static checks
       run: |
         flake8 crystalline tests --select=E9,F63,F7,F82,F83,F841
+
+  package-and-benchmark:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: Build wheel and source distribution
+      run: |
+        python -m pip install --upgrade pip build
+        python -m build
+
+    - name: Install wheel into isolated environment
+      run: |
+        python -m venv .benchmark-venv
+        . .benchmark-venv/bin/activate
+        python -m pip install dist/*.whl
+        python -c "import crystalline; print(crystalline.__version__); print(crystalline.get_tier_info())"
+
+    - name: Verify installed package boundary
+      run: |
+        . .benchmark-venv/bin/activate
+        python - <<'PY'
+        import pathlib
+        import crystalline
+        root = pathlib.Path(crystalline.__file__).resolve().parent
+        files = sorted(p.relative_to(root).as_posix() for p in root.rglob('*') if p.is_file())
+        print('\n'.join(files))
+        assert all(not path.startswith(('tests/', 'docs/', 'benchmarks/', 'examples/')) for path in files)
+        assert (root / 'backend.py').is_file()
+        assert (root / 'api.py').is_file()
+        PY
+
+    - name: Run reproducible benchmark after correctness gate
+      run: |
+        . .benchmark-venv/bin/activate
+        python benchmarks/advanced_baseline_comparison.py | tee benchmark-output.txt
+
+    - name: Upload benchmark evidence
+      uses: actions/upload-artifact@v4
+      with:
+        name: crystalline-tier1-benchmark
+        path: benchmark-output.txt
