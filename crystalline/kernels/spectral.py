@@ -150,10 +150,27 @@ def periodogram(
     fs: float = 1.0,
     window: str = "hamming",
 ) -> Tuple[np.ndarray, np.ndarray]:
-    """Compute a Welch PSD using SciPy's ``signal.welch`` convention."""
+    """Compute a one-sided density-scaled periodogram.
+
+    The implementation delegates to SciPy's ``signal.periodogram`` with
+    detrending disabled so its semantics match ``spectral_analysis``.
+    """
+    data = np.asarray(data, dtype=np.float64)
     if fs <= 0:
         raise ValueError("fs must be positive")
-    return signal.welch(data, fs=fs, window=window)
+    if data.ndim != 1:
+        raise ValueError("periodogram expects a one-dimensional signal")
+    if data.size == 0:
+        raise ValueError("periodogram requires at least one sample")
+
+    return signal.periodogram(
+        data,
+        fs=fs,
+        window=window,
+        detrend=False,
+        scaling="density",
+        return_onesided=True,
+    )
 
 
 def stft(
