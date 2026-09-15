@@ -50,6 +50,10 @@ viz = [
 requires = ["setuptools>=45", "wheel"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools.packages.find]
+include = ["crystalline", "crystalline.*"]
+exclude = ["tests", "tests.*", "docs", "benchmarks", "examples"]
+
 [tool.black]
 line-length = 100
 target-version = ['py310']
