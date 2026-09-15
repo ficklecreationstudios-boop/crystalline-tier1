@@ -1,0 +1,37 @@
+# Founder Audit — Claim Disposition
+
+## Frozen production boundary
+
+The audit began from `main` commit `fa7ad15be712032500d29d161099923e24089080`, tree `933dda3c5784a23d993ccf13e37674ae9a2278c1`. That boundary remains unchanged on `main`.
+
+## Current claim standard
+
+Every public claim must be one of:
+
+- **Implemented:** directly supported by the current source and tests.
+- **Reference-aligned:** numerical behavior is checked against an independent NumPy/SciPy reference.
+- **Benchmark-specific:** supported only for a named operation, environment, and methodology.
+- **Unavailable:** explicitly outside Tier 1 scope.
+- **Historical:** retained for provenance but not presented as a current capability.
+
+## Dispositions
+
+| Claim | Finding | Action |
+|---|---|---|
+| Tier 1 is CPU-only | Supported | Retained and made explicit. |
+| Spectral analysis provides a one-sided density-scaled PSD | Supported after numerical correction | Backend implementation and independent even/odd-length tests aligned to SciPy periodogram semantics. |
+| Convolution supports stride | Previously incomplete | Implemented stride validation and output selection; independent test added. |
+| Filtering accepts physical Hz cutoffs | Unsupported by the API | Corrected documentation/examples to normalized SciPy cutoffs because no sampling-frequency parameter exists. |
+| Experimental spectral helper is a faster optimized path | Unsupported | Removed performance positioning; kept it source-visible and correctness-aligned. |
+| Tier 1 is universally faster / 10x faster / within 10–20% | Unsupported | Removed from current public positioning; historical artifacts quarantined. |
+| Tier 1 has GPU execution | False | Explicitly unavailable. |
+| Higher-tier prices/performance targets are established by this repository | Unsupported | Removed from Tier 1 documentation. |
+| Production readiness is established by historical timings | Unsupported | Removed. |
+
+## Benchmark gate
+
+The replacement benchmark compares equivalent mathematical operations. Raw FFT timings are not used as evidence for a PSD API because they omit windowing and PSD density normalization. No blanket performance claim will be published from the replacement benchmark.
+
+## Remediation principle
+
+When a claim fails because the implementation is weaker than the intended contract but the contract itself is reasonable, repair the implementation and add an independent regression test. When the claim is unsupported by the available evidence, narrow or remove the claim rather than altering code solely to make a benchmark look favorable.
