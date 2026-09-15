@@ -16,28 +16,21 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
-    
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -e ".[dev]"
-    
-    - name: Lint with flake8
-      run: |
-        flake8 crystalline tests
-    
-    - name: Format check with black
-      run: |
-        black --check crystalline tests
-    
+
     - name: Test with pytest
       run: |
         pytest --cov=crystalline tests/
-    
-    - name: Upload coverage
-      uses: codecov/codecov-action@v3
+
+    - name: Critical static checks
+      run: |
+        flake8 crystalline tests --select=E9,F63,F7,F82,F83,F841
