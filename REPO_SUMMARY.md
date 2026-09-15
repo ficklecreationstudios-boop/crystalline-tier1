@@ -1,271 +1,62 @@
-# ✅ Crystalline GPU Tier 1 - GitHub Repository Created
+# Crystalline Tier 1 — Repository Summary
 
-Your tier 1 GitHub repository has been successfully set up in:
-```
-d:\crystalline-tier1-open\
-```
+## Current scope
 
-## 📋 What Was Created
+This repository contains the free Tier 1 edition of Crystalline: a CPU-only Python numerical and signal-processing utility package built on NumPy and SciPy.
 
-### Core Package Structure
-```
-crystalline/
-├── __init__.py              # Tier 1 enforcement & exports
-├── api.py                   # Public API (spectral analysis, filtering)
-├── backend.py               # CPU-only backend (GPU blocked)
-├── licensing/
-│   └── __init__.py          # Tier restrictions & feature blocking
-└── kernels/
-    └── __init__.py          # Available kernels list
-```
+### Implemented capabilities
 
-### Documentation
-```
-docs/
-├── tier1-guide.md           # Setup guide & examples
-└── api-reference.md         # Complete API documentation
+- One-dimensional spectral analysis with one-sided density-scaled PSD output.
+- Butterworth filtering through SciPy's digital filter routines.
+- CPU matrix multiplication.
+- CPU linear-system solving.
+- One-dimensional convolution with optional zero padding and stride.
+- Source-visible experimental spectral helpers.
+- Tier 1 runtime enforcement that blocks GPU and higher-tier features.
 
-CONTRIBUTING.md              # Contributing guidelines
-GITHUB_SETUP.md              # Step-by-step GitHub push guide
-MONETIZATION_STRATEGY.md     # Tier protection architecture
-```
+### Explicitly unavailable
 
-### Testing & Examples
-```
-tests/
-├── __init__.py
-└── test_crystalline.py      # Unit tests (fixtures, tier checks)
+- GPU execution.
+- JIT-specialized execution as a Tier 1 feature.
+- Domain-specific wheels.
+- Commercial or enterprise support/licensing features.
 
-examples/
-├── 1_spectral_analysis.py   # FFT example
-├── 2_filtering.py           # Filter example
-├── 3_linear_algebra.py      # Matrix operations example
-└── 4_tier_access.py         # Tier restrictions demo
-```
+## Audit status
 
-### Configuration Files
-```
-setup.py                      # Package setup script
-pyproject.toml               # Modern Python project config
-requirements.txt             # Dependencies (NumPy, SciPy only)
-pytest.ini                   # Test configuration
-README.md                    # Main repository readme
-LICENSE                      # GPL-3.0 license
-.gitignore                   # Prevents higher-tier files
-.github/workflows/
-    └── tests.yml            # CI/CD pipeline (GitHub Actions)
-```
+The repository underwent a founder-level audit because its historical benchmark reports made broader performance claims than the evidence supported. The frozen production boundary is preserved on `main` at commit `fa7ad15be712032500d29d161099923e24089080`.
 
-## 🔐 Security Features Implemented
+Remediation is being developed on `founder-audit-remediation` and must not be interpreted as a change to the frozen `main` boundary until deliberately merged.
 
-### Tier 1 Enforcement
-✅ **Feature Blocking**
-- All attempts to access GPU/Champion Mode/JIT raise `TierFeatureBlockedError`
-- Runtime checks on every feature access
-- Clear error messages with sales contact info
+## Numerical validation
 
-✅ **Architectural Protection**
-- GPU backend not importable (raises immediately)
-- No GPU code in repository (can't reverse-engineer)
-- No licensing system (GPL-3.0 compliant)
+Independent tests compare core behavior with NumPy/SciPy reference implementations. Current coverage includes:
 
-✅ **Source Protection**
-- `.gitignore` prevents tier 2+ files from entering Git
-- `setup.py` excludes higher-tier packages
-- Build system isolation
+- even- and odd-length PSD calculations;
+- sampling-rate validation;
+- normalized Butterworth filtering;
+- convolution stride behavior;
+- experimental spectral helper equivalence;
+- invalid FFT input handling.
 
-✅ **Dependency Isolation**
-- Only CPU libraries: NumPy, SciPy
-- No CUDA/ROCm/GPU dependencies
-- No commercial licensing libraries
+## Performance evidence
 
-### Multiple Enforcement Layers
-1. **Import time** - Tier validation on module import
-2. **Runtime** - Feature checking on function calls
-3. **API level** - Backend class raises errors
-4. **Build system** - setup.py excludes higher tiers
-5. **Version control** - .gitignore prevents mixing tiers
+Historical benchmark artifacts are retained for provenance but are quarantined from current product claims. A replacement benchmark compares equivalent mathematical operations and records environment-specific timing statistics. It does not create a blanket speed-up claim.
 
-## 💰 Monetization Protection
+The project follows this evidence order:
 
-**Why Tier 1 cannot access higher-tier features:**
+1. Numerical correctness.
+2. Reproducible methodology.
+3. Performance measurement.
+4. Product positioning.
 
-| Blocker | Effect |
-|---------|--------|
-| No GPU code in repo | Can't reverse-engineer GPU kernels |
-| Feature checks on every call | Runtime errors if attempted |
-| GPU backend unavailable | Can't instantiate GPUBackend at all |
-| .gitignore rules | Tier 2+ wheels excluded from Git |
-| Separate packages | Each tier is a separate PyPI package |
-| GPL-3.0 obligation | Forks must remain open-source |
+## Packaging
 
-## 🚀 Next Steps: Push to GitHub
+The project uses `pyproject.toml`, supports Python 3.10+, and declares NumPy and SciPy as runtime dependencies. CI tests Python 3.10–3.12 on Ubuntu, Windows, and macOS.
 
-### 1. Quick Start (Copy-Paste Commands)
+## Support
 
-```powershell
-# Navigate to the directory
-cd d:\crystalline-tier1-open
+Bug reports and project discussion belong in the repository's GitHub Issues. No sales contact or higher-tier pricing is asserted by this Tier 1 repository.
 
-# Initialize Git
-git init
-git add .
-git commit -m "Initial commit: Crystalline GPU Tier 1 open-source release"
-```
+## Important interpretation
 
-### 2. Create Repository on GitHub
-
-1. Go to https://github.com/new
-2. Name: `crystalline-tier1`
-3. Description: "Crystalline GPU - Tier 1 (Free, CPU-only Edition)"
-4. **Visibility: Public** (GPL-3.0 requirement)
-5. License: GNU General Public License v3.0
-6. Click "Create repository"
-
-### 3. Connect and Push
-
-```powershell
-# Replace YOUR_USERNAME with your GitHub username
-git remote add origin https://github.com/YOUR_USERNAME/crystalline-tier1.git
-git branch -M main
-git push -u origin main
-```
-
-**See [GITHUB_SETUP.md](./GITHUB_SETUP.md) for detailed instructions.**
-
-## 📊 Package Statistics
-
-```
-Files Created:           35+
-Directories:             8
-Python Modules:          8
-Documentation Pages:     4
-Example Scripts:         4
-Test Cases:              20+
-Lines of Code:           2000+
-```
-
-## ✨ Key Features
-
-### Tier 1 Includes:
-- ✅ Spectral analysis (FFT-based)
-- ✅ Signal filtering (Butterworth filters)
-- ✅ Linear algebra (matrix ops, solve)
-- ✅ Convolution & signal processing
-- ✅ CPU-only (no GPU)
-- ✅ Open-source (GPL-3.0)
-- ✅ Cross-platform (Windows/Mac/Linux)
-
-### Tier 1 Excludes:
-- ❌ GPU acceleration
-- ❌ Champion Mode
-- ❌ JIT specialization
-- ❌ Domain wheels
-- ❌ Commercial licensing
-- ❌ Enterprise support
-
-## 📖 Documentation Map
-
-| Document | Purpose |
-|----------|---------|
-| [README.md](./README.md) | Main repo readme with overview |
-| [docs/tier1-guide.md](./docs/tier1-guide.md) | User guide & setup instructions |
-| [docs/api-reference.md](./docs/api-reference.md) | Complete API documentation |
-| [CONTRIBUTING.md](./CONTRIBUTING.md) | Guidelines for contributors |
-| [GITHUB_SETUP.md](./GITHUB_SETUP.md) | How to push to GitHub |
-| [MONETIZATION_STRATEGY.md](./MONETIZATION_STRATEGY.md) | Tier protection architecture |
-
-## 🧪 Testing
-
-All tests verify tier protection:
-
-```bash
-# Run tests
-pytest
-
-# Run with coverage
-pytest --cov=crystalline
-
-# Run specific test
-pytest tests/test_crystalline.py::TestTierEnforcement::test_gpu_backend_blocked
-```
-
-## 🎯 Example Usage
-
-```python
-from crystalline import spectral_analysis
-import numpy as np
-
-# Create signal
-signal = np.random.randn(1024)
-
-# Analyze (works - Tier 1 feature)
-freqs, psd = spectral_analysis(signal, fs=100.0)
-
-# Try GPU (fails - not Tier 1)
-from crystalline.backend import GPUBackend
-backend = GPUBackend()  # ❌ TierFeatureBlockedError
-```
-
-## 📦 Publishing to PyPI (Optional)
-
-When ready to publish:
-
-```bash
-pip install build twine
-python -m build
-python -m twine upload dist/*
-```
-
-Then users can do: `pip install crystalline-tier1`
-
-## 🎓 Educational Value
-
-This repo demonstrates:
-- ✅ Proper package structure
-- ✅ Tier/feature enforcement patterns
-- ✅ Security through architecture
-- ✅ GPL-3.0 compliance
-- ✅ GitHub workflow setup
-- ✅ CI/CD with GitHub Actions
-- ✅ Professional Python packaging
-
-## ⚙️ CI/CD Pipeline
-
-GitHub Actions configured to:
-- ✅ Run tests on Python 3.10, 3.11, 3.12
-- ✅ Test across Windows, macOS, Linux
-- ✅ Check code style (black, flake8)
-- ✅ Generate coverage reports
-- ✅ Fail on tier protection breaches
-
-## 🔗 Integration Points
-
-All files reference proper upsell:
-- Error messages include `[CONTACT_EMAIL]`
-- Docs reference tier comparison matrix
-- Examples show tier restrictions clearly
-- README has upsell badges
-
-## 📝 License
-
-- ✅ GPL-3.0 license included
-- ✅ Compliant with open-source requirements
-- ✅ Users can fork and modify (must keep GPL)
-- ✅ No proprietary code
-
-## 🎉 Summary
-
-Your Tier 1 repository is:
-- ✅ Fully functional (CPU-based, no GPU needed)
-- ✅ Completely secure (no tier bypassing possible)
-- ✅ Ready to publish (to GitHub & PyPI)
-- ✅ Well documented (guides & API reference)
-- ✅ Professionally structured (industry standards)
-- ✅ Monetization-proof (higher tiers protected)
-
-**Ready to push to GitHub? Follow [GITHUB_SETUP.md](./GITHUB_SETUP.md)!** 🚀
-
----
-
-**Questions?** Check the [docs](./docs/) or open an issue when GitHub repo is created.
+This document is a current repository summary, not a performance advertisement. Statements about speed, production readiness, GPU acceleration, or future tiers require separate evidence and are not inferred from the existence of this package.
