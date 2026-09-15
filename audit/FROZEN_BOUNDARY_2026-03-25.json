@@ -1,0 +1,19 @@
+{
+  "audit": "Founder’s Audit remediation",
+  "purpose": "Immutable reference for all remediation work on this branch; no claim here describes post-freeze behavior.",
+  "repository": "ficklecreationstudios-boop/crystalline-tier1",
+  "frozen_branch": "main",
+  "frozen_commit": "fa7ad15be712032500d29d161099923e24089080",
+  "frozen_tree": "933dda3c5784a23d993ccf13e37674ae9a2278c1",
+  "frozen_at": "2026-03-25T19:40:22Z",
+  "remediation_branch": "founder-audit-remediation",
+  "rule": "The frozen main commit/tree remains the audit reference. Remediation commits on this branch must not be treated as evidence about the frozen state.",
+  "initial_findings": [
+    "Tier 1 is CPU-only; GPUBackend is intentionally blocked.",
+    "Benchmark artifacts are internally inconsistent and contain unsupported broad performance claims.",
+    "spectral_analysis has an FFT/PSD normalization and odd-length endpoint correctness risk.",
+    "convolution accepts stride but does not apply it.",
+    "Public metadata and README contain placeholder repository/contact/domain values.",
+    "Numerical correctness must be established before performance optimization claims are retained."
+  ]
+}

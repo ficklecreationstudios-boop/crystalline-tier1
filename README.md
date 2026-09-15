@@ -1,111 +1,98 @@
-# Crystalline GPU - Tier 1 (Free Edition)
+# Crystalline Tier 1
 
 ![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue.svg)
 ![Python: 3.10+](https://img.shields.io/badge/Python-3.10%2B-brightgreen)
 ![Platform: Cross-platform](https://img.shields.io/badge/Platform-Cross--platform-lightgrey)
 
-**Open-source, CPU-based GPU acceleration library for learning and experimentation.**
+**Open-source CPU numerical and signal-processing utilities for learning, research, and experimentation.**
 
-## ⚠️ Tier 1 (Free) - CPU Only
+## Tier 1: CPU-only
 
-This is the **free, open-source Tier 1 edition** of Crystalline GPU. It provides:
+Crystalline Tier 1 is the free, open-source edition. It provides a small Python API built on NumPy and SciPy.
 
-✅ **Available Features:**
-- Core spectral analysis algorithms (CPU-based)
-- Linear algebra operations (NumPy/SciPy-backed)
-- Signal processing utilities
-- Educational and research use
-- Full source code transparency
+### Available
 
-❌ **NOT Available (Higher Tiers Only):**
-- GPU acceleration (requires Tier 2+)
-- Champion Mode optimization (Tier 4 only)
-- JIT specialization (Tier 4 only)
-- Domain-specific wheels (Tier 3+)
-- Commercial licensing (Tier 2+)
-- Hardware-bound licensing (Tier 2+)
-- Enterprise support (Tier 3+)
+- FFT-based one-sided power spectral density analysis
+- Butterworth signal filtering
+- CPU linear algebra helpers
+- CPU matrix multiplication
+- Basic one-dimensional convolution with padding and stride
+- Source-visible implementation for research and experimentation
+
+### Not included
+
+- GPU acceleration
+- JIT-specialized execution
+- Domain-specific wheels
+- Commercial or enterprise licensing/support features
+
+No higher-tier runtime is implemented by this repository.
 
 ## Installation
 
-### From PyPI (recommended)
-
-```bash
-pip install crystalline-tier1
-```
-
 ### From source
 
+The repository is the authoritative installation path for the current remediation state:
+
 ```bash
-git clone https://github.com/yourusername/crystalline-tier1.git
+git clone https://github.com/ficklecreationstudios-boop/crystalline-tier1.git
 cd crystalline-tier1
 pip install -e .
 ```
 
-### System Requirements
+A PyPI installation command is intentionally not advertised here because a public PyPI release was not verified during this audit.
+
+## System requirements
 
 - Python 3.10 or higher
 - NumPy >= 1.19.0
 - SciPy >= 1.5.0
-- Cross-platform (Windows, macOS, Linux)
+- Windows, macOS, or Linux
 
-## Quick Start
+## Quick start
 
 ```python
+import numpy as np
 from crystalline import get_backend
 
-# Get the Tier 1 (CPU) backend
 backend = get_backend()
+data = np.random.default_rng(0).normal(size=1024)
 
-# Use available tier 1 operations
-import numpy as np
-data = np.random.randn(1024)
-
-# Spectral analysis (CPU-based)
-result = backend.spectral_analysis(data)
-print(result)
+freqs, psd = backend.spectral_analysis(data, fs=100.0)
+print(freqs.shape, psd.shape)
 ```
+
+`spectral_analysis` uses a direct real FFT and density normalization consistent with SciPy's periodogram convention (`detrend=False`, `scaling="density"`).
 
 ## Documentation
 
-- **[Usage Guide](./docs/tier1-guide.md)** - Detailed examples and API reference
-- **[API Reference](./docs/api-reference.md)** - Complete API documentation
-- **[Troubleshooting](./docs/troubleshooting.md)** - Common issues and solutions
+- [Usage Guide](./docs/tier1-guide.md)
+- [API Reference](./docs/api-reference.md)
+- [Troubleshooting](./docs/troubleshooting.md)
+
+## Validation
+
+The repository contains independent numerical tests under `tests/`. These compare core results against established NumPy/SciPy reference behavior rather than benchmarking the implementation against itself.
+
+Performance claims should be treated as benchmark-specific. Historical benchmark artifacts in `benchmarks/` are retained for auditability and are not a basis for a blanket speed-up claim. The current CI workflow also runs a reproducible benchmark only after the cross-platform correctness matrix passes; its results are evidence for the tested environment and workloads only.
 
 ## Licensing
 
-This Tier 1 edition is released under the **GPL-3.0 License** for open-source use.
+This Tier 1 edition is released under the **GPL-3.0 License**. See [LICENSE](./LICENSE).
 
-See [LICENSE](./LICENSE) for details.
+## Support and contributions
 
-### For Higher Tiers:
-
-- **Tier 2** (GPU) - Commercial: Contact [SALES_EMAIL]
-- **Tier 3** (Domain Wheels) - Enterprise: Contact [SALES_EMAIL]  
-- **Tier 4** (Champion Mode) - Premium: Contact [SALES_EMAIL]
-
-## Support
-
-- **Issues**: [GitHub Issues](https://github.com/yourusername/crystalline-tier1/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/crystalline-tier1/discussions)
-- **Commercial Support**: [CONTACT_EMAIL]
-
-## Contributing
-
-Contributions are welcome! Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
+Please use [GitHub Issues](https://github.com/ficklecreationstudios-boop/crystalline-tier1/issues) for bug reports and project discussion. Contributions are welcome; see [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ## Roadmap
 
-- [x] Core spectral analysis (Tier 1)
+- [x] Core spectral analysis
 - [x] CPU-based linear algebra
-- [ ] Performance documentation
-- [ ] Usage examples database
-- [ ] Community contributions
+- [x] Independent numerical correctness checks
+- [x] Reproducible benchmark suite and methodology
+- [x] Expanded usage examples
+- [x] Broader numerical test coverage
 
 ## Disclaimer
 
-This Tier 1 edition is provided AS-IS for educational and research purposes. For production GPU-accelerated workloads, see [Tier 2+ licensing](TIER2_INFO).
-
----
-
-**Crystalline GPU**: Universally accelerated computing.
+This software is provided AS-IS under the GPL-3.0 License. It is a CPU-only research and experimentation library. No claim of universal acceleration, GPU execution, or production suitability is made by this Tier 1 repository.

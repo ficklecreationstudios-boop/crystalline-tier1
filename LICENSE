@@ -18,14 +18,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ---
 
-DISCLAIMER FOR TIER 1 EDITION:
+PROJECT SCOPE NOTE
 
-This Tier 1 edition is provided for educational and research purposes.
-Features requiring GPU acceleration, commercial use, or advanced 
-optimizations are available only in paid tiers (Tier 2+).
+The published Crystalline Tier 1 repository implements CPU-only numerical
+and signal-processing utilities. GPU acceleration and other features not
+implemented in this repository are outside the scope of this distribution.
+This scope note does not add restrictions to the GPL-3.0 license above.
 
-For commercial licensing, GPU acceleration, or enterprise support,
-please contact: [SALES_EMAIL]
-
-See the complete GPL-3.0 license text:
+The complete GPL-3.0 license text is available at:
 https://www.gnu.org/licenses/gpl-3.0.en.html

@@ -1,24 +1,38 @@
-"""
-Advanced Baseline Comparison - Cold Start + Stability Analysis
+"""Reproducible baseline comparison for Tier 1 operations.
 
-Tests all libraries (NumPy, SciPy, PyTorch, Crystalline) with:
-- Cold start measurements
-- Warm-up iterations
-- Stability/variance analysis (50 runs)
-- Coefficient of variation
+The benchmark deliberately compares equivalent mathematical operations. A raw
+NumPy FFT is not treated as a baseline for Crystalline's PSD API because it
+omits windowing, density normalization, and one-sided PSD construction.
+
+This script reports cold, warm, and stability timings. It does not assert that
+Crystalline is faster than another implementation; results are evidence for a
+specific environment only. The run metadata printed at startup records the
+software versions, platform, random seed, and iteration counts needed to
+interpret the timing evidence.
 """
+
+import platform
+import sys
+import time
+import warnings
 
 import numpy as np
-import time
+import scipy
 from scipy import signal
-import warnings
-warnings.filterwarnings('ignore')
+
+warnings.filterwarnings("ignore")
 
 try:
     import torch
     HAS_TORCH = True
 except ImportError:
     HAS_TORCH = False
+
+
+SEED = 42
+WARM_RUNS = 20
+STABILITY_RUNS = 50
+
 
 class StabilityAnalyzer:
     """Analyze cold start, warm-up, and stability metrics."""
@@ -30,259 +44,163 @@ class StabilityAnalyzer:
         self.stability_times = np.array(stability_times) if stability_times else np.array([])
 
     def stats(self):
-        """Compute statistics."""
+        """Compute summary statistics in milliseconds."""
+        stability = self.stability_times
         return {
-            'cold_start': self.cold_time,
-            'warm_mean': np.mean(self.warm_times) if len(self.warm_times) > 0 else None,
-            'warm_std': np.std(self.warm_times) if len(self.warm_times) > 0 else None,
-            'stability_mean': np.mean(self.stability_times) if len(self.stability_times) > 0 else None,
-            'stability_std': np.std(self.stability_times) if len(self.stability_times) > 0 else None,
-            'stability_cv': (np.std(self.stability_times) / np.mean(self.stability_times) * 100) if len(self.stability_times) > 0 and np.mean(self.stability_times) > 0 else None,
+            "cold_start": self.cold_time,
+            "warm_mean": np.mean(self.warm_times) if self.warm_times.size else None,
+            "warm_std": np.std(self.warm_times) if self.warm_times.size else None,
+            "stability_mean": np.mean(stability) if stability.size else None,
+            "stability_std": np.std(stability) if stability.size else None,
+            "stability_median": np.median(stability) if stability.size else None,
+            "stability_p95": np.percentile(stability, 95) if stability.size else None,
+            "stability_cv": (
+                np.std(stability) / np.mean(stability) * 100
+                if stability.size and np.mean(stability) > 0
+                else None
+            ),
         }
 
     def format_stats(self):
-        """Format stats for display."""
         s = self.stats()
         return {
-            'Cold Start': f"{s['cold_start']:.3f} ms" if s['cold_start'] else "N/A",
-            'Warm Mean': f"{s['warm_mean']:.3f} ms" if s['warm_mean'] else "N/A",
-            'Warm Std': f"{s['warm_std']:.3f} ms" if s['warm_std'] else "N/A",
-            'Stability Mean': f"{s['stability_mean']:.3f} ms" if s['stability_mean'] else "N/A",
-            'Stability Std': f"{s['stability_std']:.3f} ms" if s['stability_std'] else "N/A",
-            'Coefficient of Variation': f"{s['stability_cv']:.1f}%" if s['stability_cv'] is not None else "N/A",
+            "Cold Start": f"{s['cold_start']:.3f} ms" if s["cold_start"] is not None else "N/A",
+            "Warm Mean": f"{s['warm_mean']:.3f} ms" if s["warm_mean"] is not None else "N/A",
+            "Warm Std": f"{s['warm_std']:.3f} ms" if s["warm_std"] is not None else "N/A",
+            "Stability Median": (
+                f"{s['stability_median']:.3f} ms"
+                if s["stability_median"] is not None
+                else "N/A"
+            ),
+            "Stability P95": (
+                f"{s['stability_p95']:.3f} ms" if s["stability_p95"] is not None else "N/A"
+            ),
+            "Coefficient of Variation": (
+                f"{s['stability_cv']:.1f}%" if s["stability_cv"] is not None else "N/A"
+            ),
         }
 
 
-def benchmark_spectral_fft():
-    """Compare FFT performance across all libraries."""
+def _measure(fn, warm_runs=WARM_RUNS, stability_runs=STABILITY_RUNS):
+    start = time.perf_counter()
+    fn()
+    cold = (time.perf_counter() - start) * 1000
 
-    print("\n" + "="*100)
-    print("🚀 SPECTRAL ANALYSIS (FFT) - COLD START + STABILITY COMPARISON")
-    print("="*100)
+    warm = []
+    for _ in range(warm_runs):
+        start = time.perf_counter()
+        fn()
+        warm.append((time.perf_counter() - start) * 1000)
 
-    from crystalline import spectral_analysis as cryst_fft
+    stability = []
+    for _ in range(stability_runs):
+        start = time.perf_counter()
+        fn()
+        stability.append((time.perf_counter() - start) * 1000)
+
+    return cold, warm, stability
+
+
+def _print_results(results):
+    print(
+        f"\n{'Library':<28} {'Cold':<14} {'Warm Mean':<14} "
+        f"{'Median':<14} {'P95':<14} {'CV':<10}"
+    )
+    print("-" * 100)
+    for name, analyzer in results.items():
+        s = analyzer.stats()
+        print(
+            f"{name:<28} {s['cold_start']:.3f} ms      "
+            f"{s['warm_mean']:.3f} ms      {s['stability_median']:.3f} ms      "
+            f"{s['stability_p95']:.3f} ms      {s['stability_cv']:.1f}%"
+        )
+
+
+def benchmark_spectral_psd():
+    """Compare equivalent one-sided density-scaled PSD calculations."""
+    print("\n" + "=" * 100)
+    print("SPECTRAL PSD — EQUIVALENT SEMANTICS")
+    print("=" * 100)
+
+    from crystalline import spectral_analysis
 
     sizes = [1024, 10240, 102400]
-    warm_runs = 20
-    stability_runs = 50
-
     for size in sizes:
-        print(f"\n📈 Array Size: {size:,} samples")
-        print("-"*100)
-
-        data = np.random.randn(size).astype(np.float64)
+        print(f"\nArray Size: {size:,} samples")
+        data = np.random.default_rng(SEED).normal(size=size).astype(np.float64)
         results = {}
 
-        # NumPy FFT (baseline)
-        start = time.perf_counter()
-        np.fft.fft(data)
-        cold_numpy = (time.perf_counter() - start) * 1000
+        def scipy_psd():
+            signal.periodogram(
+                data,
+                fs=1.0,
+                window="hamming",
+                detrend=False,
+                scaling="density",
+                return_onesided=True,
+            )
 
-        warm_times = []
-        for _ in range(warm_runs):
-            start = time.perf_counter()
-            np.fft.fft(data)
-            warm_times.append((time.perf_counter() - start) * 1000)
+        def crystalline_psd():
+            spectral_analysis(data, fs=1.0, window="hamming")
 
-        stability_times = []
-        for _ in range(stability_runs):
-            start = time.perf_counter()
-            np.fft.fft(data)
-            stability_times.append((time.perf_counter() - start) * 1000)
+        for name, fn in (
+            ("SciPy periodogram", scipy_psd),
+            ("Crystalline Tier 1", crystalline_psd),
+        ):
+            cold, warm, stability = _measure(fn)
+            results[name] = StabilityAnalyzer(name, cold, warm, stability)
 
-        results['NumPy FFT'] = StabilityAnalyzer('NumPy', cold_numpy, warm_times, stability_times)
-
-        # SciPy Periodogram (old approach)
-        start = time.perf_counter()
-        signal.periodogram(data)
-        cold_scipy = (time.perf_counter() - start) * 1000
-
-        warm_times = []
-        for _ in range(warm_runs):
-            start = time.perf_counter()
-            signal.periodogram(data)
-            warm_times.append((time.perf_counter() - start) * 1000)
-
-        stability_times = []
-        for _ in range(stability_runs):
-            start = time.perf_counter()
-            signal.periodogram(data)
-            stability_times.append((time.perf_counter() - start) * 1000)
-
-        results['SciPy Periodogram'] = StabilityAnalyzer('SciPy', cold_scipy, warm_times, stability_times)
-
-        # PyTorch FFT (if available)
         if HAS_TORCH:
-            torch_data = torch.from_numpy(data)
-            start = time.perf_counter()
-            torch.fft.fft(torch_data)
-            cold_torch = (time.perf_counter() - start) * 1000
+            # PyTorch's raw FFT is intentionally not included: it is not the
+            # same operation as the density-scaled PSD API.
+            print("PyTorch raw FFT omitted: different mathematical semantics.")
 
-            warm_times = []
-            for _ in range(warm_runs):
-                start = time.perf_counter()
-                torch.fft.fft(torch_data)
-                warm_times.append((time.perf_counter() - start) * 1000)
-
-            stability_times = []
-            for _ in range(stability_runs):
-                start = time.perf_counter()
-                torch.fft.fft(torch_data)
-                stability_times.append((time.perf_counter() - start) * 1000)
-
-            results['PyTorch FFT'] = StabilityAnalyzer('PyTorch', cold_torch, warm_times, stability_times)
-
-        # Crystalline Tier 1 (optimized)
-        start = time.perf_counter()
-        cryst_fft(data)
-        cold_cryst = (time.perf_counter() - start) * 1000
-
-        warm_times = []
-        for _ in range(warm_runs):
-            start = time.perf_counter()
-            cryst_fft(data)
-            warm_times.append((time.perf_counter() - start) * 1000)
-
-        stability_times = []
-        for _ in range(stability_runs):
-            start = time.perf_counter()
-            cryst_fft(data)
-            stability_times.append((time.perf_counter() - start) * 1000)
-
-        results['Crystalline Tier 1'] = StabilityAnalyzer('Crystalline', cold_cryst, warm_times, stability_times)
-
-        # Display results
-        print(f"\n{'Library':<25} {'Cold Start':<15} {'Warm Mean':<15} {'Warm Std':<15} {'Stab. CV':<12}")
-        print("-"*100)
-
-        for lib_name, analyzer in results.items():
-            fmt = analyzer.format_stats()
-            cv = analyzer.stats()['stability_cv']
-            cv_str = f"{cv:.1f}%" if cv is not None else "N/A"
-            print(f"{lib_name:<25} {fmt['Cold Start']:<15} {fmt['Warm Mean']:<15} {fmt['Warm Std']:<15} {cv_str:<12}")
-
-        # Performance analysis
-        print(f"\n📊 Performance Analysis:")
-        baseline_warm = results['NumPy FFT'].stats()['warm_mean']
-        for lib_name, analyzer in results.items():
-            if lib_name != 'NumPy FFT':
-                warm = analyzer.stats()['warm_mean']
-                ratio = baseline_warm / warm
-                symbol = "✓" if ratio >= 0.9 else "⚠"
-                print(f"  {symbol} {lib_name}: {ratio:.2f}x vs NumPy")
+        _print_results(results)
 
 
 def benchmark_matrix_multiplication():
-    """Compare matrix multiplication performance."""
-
-    print("\n" + "="*100)
-    print("⚡ MATRIX MULTIPLICATION - COLD START + STABILITY COMPARISON")
-    print("="*100)
+    """Compare equivalent matrix multiplication operations."""
+    print("\n" + "=" * 100)
+    print("MATRIX MULTIPLICATION — EQUIVALENT SEMANTICS")
+    print("=" * 100)
 
     from crystalline.backend import get_backend
-    backend = get_backend()
 
+    backend = get_backend()
     sizes = [256, 1024]
-    warm_runs = 20
-    stability_runs = 50
 
     for size in sizes:
-        print(f"\n📈 Matrix Size: {size}×{size}")
-        print("-"*100)
-
-        np.random.seed(42)
-        A = np.random.randn(size, size).astype(np.float64)
-        B = np.random.randn(size, size).astype(np.float64)
+        print(f"\nMatrix Size: {size}×{size}")
+        rng = np.random.default_rng(SEED)
+        A = rng.normal(size=(size, size)).astype(np.float64)
+        B = rng.normal(size=(size, size)).astype(np.float64)
         results = {}
 
-        # NumPy
-        start = time.perf_counter()
-        np.matmul(A, B)
-        cold_numpy = (time.perf_counter() - start) * 1000
-
-        warm_times = []
-        for _ in range(warm_runs):
-            start = time.perf_counter()
-            np.matmul(A, B)
-            warm_times.append((time.perf_counter() - start) * 1000)
-
-        stability_times = []
-        for _ in range(stability_runs):
-            start = time.perf_counter()
-            np.matmul(A, B)
-            stability_times.append((time.perf_counter() - start) * 1000)
-
-        results['NumPy matmul'] = StabilityAnalyzer('NumPy', cold_numpy, warm_times, stability_times)
-
-        # PyTorch (if available)
+        candidates = [("NumPy matmul", lambda: np.matmul(A, B)),
+                      ("Crystalline Tier 1", lambda: backend.matrix_multiply(A, B))]
         if HAS_TORCH:
             torch_A = torch.from_numpy(A)
             torch_B = torch.from_numpy(B)
-            start = time.perf_counter()
-            torch.matmul(torch_A, torch_B)
-            cold_torch = (time.perf_counter() - start) * 1000
+            candidates.append(("PyTorch matmul", lambda: torch.matmul(torch_A, torch_B)))
 
-            warm_times = []
-            for _ in range(warm_runs):
-                start = time.perf_counter()
-                torch.matmul(torch_A, torch_B)
-                warm_times.append((time.perf_counter() - start) * 1000)
+        for name, fn in candidates:
+            cold, warm, stability = _measure(fn)
+            results[name] = StabilityAnalyzer(name, cold, warm, stability)
 
-            stability_times = []
-            for _ in range(stability_runs):
-                start = time.perf_counter()
-                torch.matmul(torch_A, torch_B)
-                stability_times.append((time.perf_counter() - start) * 1000)
-
-            results['PyTorch matmul'] = StabilityAnalyzer('PyTorch', cold_torch, warm_times, stability_times)
-
-        # Crystalline
-        start = time.perf_counter()
-        backend.matrix_multiply(A, B)
-        cold_cryst = (time.perf_counter() - start) * 1000
-
-        warm_times = []
-        for _ in range(warm_runs):
-            start = time.perf_counter()
-            backend.matrix_multiply(A, B)
-            warm_times.append((time.perf_counter() - start) * 1000)
-
-        stability_times = []
-        for _ in range(stability_runs):
-            start = time.perf_counter()
-            backend.matrix_multiply(A, B)
-            stability_times.append((time.perf_counter() - start) * 1000)
-
-        results['Crystalline Tier 1'] = StabilityAnalyzer('Crystalline', cold_cryst, warm_times, stability_times)
-
-        # Display results
-        print(f"\n{'Library':<25} {'Cold Start':<15} {'Warm Mean':<15} {'Warm Std':<15} {'Stab. CV':<12}")
-        print("-"*100)
-
-        for lib_name, analyzer in results.items():
-            fmt = analyzer.format_stats()
-            cv = analyzer.stats()['stability_cv']
-            cv_str = f"{cv:.1f}%" if cv is not None else "N/A"
-            print(f"{lib_name:<25} {fmt['Cold Start']:<15} {fmt['Warm Mean']:<15} {fmt['Warm Std']:<15} {cv_str:<12}")
-
-        # Performance analysis
-        print(f"\n📊 Performance Analysis:")
-        baseline_warm = results['NumPy matmul'].stats()['warm_mean']
-        for lib_name, analyzer in results.items():
-            if lib_name != 'NumPy matmul':
-                warm = analyzer.stats()['warm_mean']
-                ratio = baseline_warm / warm
-                symbol = "✓" if ratio >= 0.95 else "⚠"
-                print(f"  {symbol} {lib_name}: {ratio:.2f}x vs NumPy")
+        _print_results(results)
 
 
 if __name__ == "__main__":
-    print("\n🔍 CRYSTALLINE TIER 1 - ADVANCED BASELINE COMPARISON")
-    print("Testing with: Cold Start + Warm-up + Stability (50 runs)")
-
-    benchmark_spectral_fft()
+    print("\nCRYSTALLINE TIER 1 — BASELINE COMPARISON")
+    print("Timing is environment-specific evidence, not a blanket performance claim.")
+    print(f"Python: {sys.version.split()[0]}")
+    print(f"NumPy: {np.__version__}")
+    print(f"SciPy: {scipy.__version__}")
+    print(f"Platform: {platform.platform()}")
+    print(f"Machine: {platform.machine()}")
+    print(f"Random seed: {SEED}")
+    print(f"Warm runs: {WARM_RUNS}; stability runs: {STABILITY_RUNS}")
+    print(f"PyTorch available: {HAS_TORCH}")
+    benchmark_spectral_psd()
     benchmark_matrix_multiplication()
-
-    print("\n" + "="*100)
-    print("✅ Advanced baseline comparison complete!")
-    print("="*100)
+    print("\nBenchmark complete.")

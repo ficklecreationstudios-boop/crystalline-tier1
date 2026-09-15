@@ -1,115 +1,90 @@
-# Crystalline GPU Tier 1 - Benchmark Report
-**Report Generated:** 2026-03-24 11:49:25
+# Crystalline Tier 1 — Historical Benchmark Record
 
-## Executive Summary
-This report presents comprehensive benchmarks comparing Crystalline GPU Tier 1
-(CPU-based) against industry-standard libraries:
+**Artifact date:** 2026-03-24  
+**Status:** Historical / audit artifact — not a current performance claim
 
-- **NumPy** - Scientific computing baseline
-- **SciPy** - Signal processing and statistics
-- **Scikit-learn** - Machine learning
-- **PyTorch** - Deep learning (CPU backend)
-- **TensorFlow** - Deep learning (CPU backend)
+## Purpose
 
-## Benchmark Results
+This file preserves benchmark output from the frozen pre-remediation repository state. It is retained for auditability, but its measurements should not be interpreted as evidence that the current implementation is faster than NumPy, SciPy, PyTorch, or any other library.
+
+The founder's audit found that benchmark artifacts were inconsistent with one another and that the repository's broad performance conclusions were not adequately supported. In particular, the old report mixed different benchmark generations and used language such as "within 10–20%" that was not justified across the reported operations and array sizes.
+
+## Frozen results retained for provenance
+
+The original benchmark tables remain below as historical observations. They are **not** reproduced as current capabilities.
 
 ### Spectral Analysis
 
-**Crystalline Tier 1 Average:** 5.655 ms
-
-| Library | Time (ms) | Ratio to Crystalline |
-|---------|-----------|---------------------|
-| Crystalline_1024 | 0.345 | 0.06x |
-| Crystalline_10240 | 1.321 | 0.23x |
-| Crystalline_102400 | 15.299 | 2.71x |
-| NumPy_1024 | 0.019 | 0.00x |
-| NumPy_10240 | 0.146 | 0.03x |
-| NumPy_102400 | 4.997 | 0.88x |
-| PyTorch_1024 | 0.026 | 0.00x |
-| PyTorch_10240 | 0.142 | 0.03x |
-| PyTorch_102400 | 0.585 | 0.10x |
-| SciPy_1024 | 0.282 | 0.05x |
-| SciPy_10240 | 1.410 | 0.25x |
-| SciPy_102400 | 11.314 | 2.00x |
+| Library | 1024 | 10240 | 102400 |
+|---|---:|---:|---:|
+| Crystalline | 0.345 ms | 1.321 ms | 15.299 ms |
+| NumPy | 0.019 ms | 0.146 ms | 4.997 ms |
+| PyTorch | 0.026 ms | 0.142 ms | 0.585 ms |
+| SciPy | 0.282 ms | 1.410 ms | 11.314 ms |
 
 ### Filtering
 
-**Crystalline Tier 1 Average:** 1.171 ms
-
-| Library | Time (ms) | Ratio to Crystalline |
-|---------|-----------|---------------------|
-| Crystalline_1024 | 0.509 | 0.43x |
-| Crystalline_10240 | 0.726 | 0.62x |
-| Crystalline_102400 | 2.277 | 1.94x |
-| PyTorch_1024 | 0.018 | 0.02x |
-| PyTorch_10240 | 0.047 | 0.04x |
-| PyTorch_102400 | 0.291 | 0.25x |
-| SciPy_1024 | 0.142 | 0.12x |
-| SciPy_10240 | 0.244 | 0.21x |
-| SciPy_102400 | 2.169 | 1.85x |
+| Library | 1024 | 10240 | 102400 |
+|---|---:|---:|---:|
+| Crystalline | 0.509 ms | 0.726 ms | 2.277 ms |
+| PyTorch | 0.018 ms | 0.047 ms | 0.291 ms |
+| SciPy | 0.142 ms | 0.244 ms | 2.169 ms |
 
 ### Matrix Multiplication
 
-**Crystalline Tier 1 Average:** 4.974 ms
-
-| Library | Time (ms) | Ratio to Crystalline |
-|---------|-----------|---------------------|
-| Crystalline_1024 | 14.478 | 2.91x |
-| Crystalline_256 | 0.411 | 0.08x |
-| Crystalline_64 | 0.033 | 0.01x |
-| NumPy_1024 | 16.138 | 3.24x |
-| NumPy_256 | 0.392 | 0.08x |
-| NumPy_64 | 0.016 | 0.00x |
-| PyTorch_1024 | 14.121 | 2.84x |
-| PyTorch_256 | 0.232 | 0.05x |
-| PyTorch_64 | 0.011 | 0.00x |
+| Library | 64 | 256 | 1024 |
+|---|---:|---:|---:|
+| Crystalline | 0.033 ms | 0.411 ms | 14.478 ms |
+| NumPy | 0.016 ms | 0.392 ms | 16.138 ms |
+| PyTorch | 0.011 ms | 0.232 ms | 14.121 ms |
 
 ### Linear Solve
 
-**Crystalline Tier 1 Average:** 9.759 ms
-
-| Library | Time (ms) | Ratio to Crystalline |
-|---------|-----------|---------------------|
-| Crystalline_1024 | 27.684 | 2.84x |
-| Crystalline_256 | 1.458 | 0.15x |
-| Crystalline_64 | 0.137 | 0.01x |
-| NumPy_1024 | 215.777 | 22.11x |
-| NumPy_256 | 69.509 | 7.12x |
-| NumPy_64 | 0.035 | 0.00x |
-| SciPy_1024 | 24.346 | 2.49x |
-| SciPy_256 | 1.446 | 0.15x |
-| SciPy_64 | 0.127 | 0.01x |
+| Library | 64 | 256 | 1024 |
+|---|---:|---:|---:|
+| Crystalline | 0.137 ms | 1.458 ms | 27.684 ms |
+| NumPy | 0.035 ms | 69.509 ms | 215.777 ms |
+| SciPy | 0.127 ms | 1.446 ms | 24.346 ms |
 
 ### Convolution
 
-**Crystalline Tier 1 Average:** 0.117 ms
+| Library | 1024 | 10240 | 102400 |
+|---|---:|---:|---:|
+| Crystalline | 0.025 ms | 0.061 ms | 0.264 ms |
+| PyTorch | 0.020 ms | 0.035 ms | 0.199 ms |
+| SciPy | 0.024 ms | 0.059 ms | 0.315 ms |
 
-| Library | Time (ms) | Ratio to Crystalline |
-|---------|-----------|---------------------|
-| Crystalline_1024 | 0.025 | 0.21x |
-| Crystalline_10240 | 0.061 | 0.52x |
-| Crystalline_102400 | 0.264 | 2.26x |
-| PyTorch_1024 | 0.020 | 0.18x |
-| PyTorch_10240 | 0.035 | 0.30x |
-| PyTorch_102400 | 0.199 | 1.70x |
-| SciPy_1024 | 0.024 | 0.21x |
-| SciPy_10240 | 0.059 | 0.50x |
-| SciPy_102400 | 0.315 | 2.70x |
+## What can and cannot be concluded
 
-## Conclusions
+### Supported by this historical record
 
-Crystalline GPU Tier 1 provides:
+- The Tier 1 implementation delegates core numerical work to NumPy/SciPy.
+- The measured timings vary substantially by operation, input size, library, and environment.
+- Some individual comparisons were close in the recorded environment.
 
-- ✅ Competitive CPU-based performance (within 10-20% of specialized libraries)
-- ✅ Simplified API for common operations
-- ✅ No GPU overhead for CPU-only workloads
-- ✅ Open-source GPL-3.0 license
+### Not supported
 
-**Next Steps:**
-- For GPU acceleration: Upgrade to Tier 2+ 
-- For domain-specific optimizations: See Tier 3 offerings
-- For enterprise features: Contact [CONTACT_EMAIL]
+- A universal speed-up factor.
+- A blanket claim that Crystalline is within 10–20% of specialized libraries.
+- A claim of GPU acceleration in Tier 1.
+- A claim that historical timings establish production suitability.
+- Forecasts such as 10–100x or 100–3000x improvements for future tiers.
+
+## Reproducibility requirements for a replacement benchmark
+
+A new performance report should be generated only after numerical correctness is independently validated. It should record at minimum:
+
+1. Exact git commit and working-tree state.
+2. Python, NumPy, SciPy, and benchmark-script versions.
+3. CPU model, OS, BLAS/LAPACK implementation, and thread settings.
+4. Identical mathematical semantics across implementations.
+5. Warm-up policy, repetition count, timer, and summary statistics.
+6. Raw observations rather than only aggregate averages.
+7. Separate cold-start and steady-state measurements.
+8. Explicit treatment of statistical uncertainty.
+
+Until such a benchmark is produced, performance claims should remain operation- and environment-specific.
 
 ---
 
-*Generated: 2026-03-24T11:49:25.655930*
+**Historical artifact preserved during founder-audit remediation.**

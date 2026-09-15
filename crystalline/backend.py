@@ -1,197 +1,133 @@
 """
 crystalline/backend.py
-Backend management for Tier 1 (CPU only)
-
-This module manages the computation backend. In Tier 1, only CPU
-operations are available.
+Backend management for Tier 1 (CPU only).
 """
 
 import numpy as np
-from scipy import signal, fft, linalg
-from crystalline.licensing import check_tier_access, TierFeatureBlockedError
+from scipy import linalg, signal
+from crystalline.licensing import TierFeatureBlockedError, check_tier_access
+
 
 class CPUBackend:
     """CPU-only backend for Tier 1."""
-    
+
     def __init__(self):
         self.device = "cpu"
         self.gpu_available = False
         self.tier = "TIER_1_FREE"
-    
-    def spectral_analysis(self, data, fs=None, window='hamming'):
-        """Perform spectral analysis using direct NumPy FFT (optimized).
 
-        Uses direct FFT instead of periodogram for better performance on
-        small-to-medium arrays. ~10x faster than scipy.signal.periodogram.
-
-        Args:
-            data: Input signal
-            fs: Sampling frequency (default: 1.0)
-            window: Window function (default: 'hamming')
-
-        Returns:
-            Tuple of (frequencies, power_spectral_density)
-        """
+    def spectral_analysis(self, data, fs=None, window="hamming"):
+        """Compute a one-sided, density-scaled power spectral density."""
         check_tier_access("spectral_analysis")
-
         data = np.asarray(data, dtype=np.float64)
-        if fs is None:
-            fs = 1.0
-
-        N = len(data)
-
-        # Apply window function directly (faster than periodogram wrapper)
-        try:
-            window_func = signal.get_window(window, N)
-        except ValueError:
-            # Fallback to hamming if window not found
-            window_func = signal.get_window('hamming', N)
-
-        windowed_data = data * window_func
-
-        # Direct FFT computation (no periodogram overhead)
-        fft_result = np.fft.fft(windowed_data)
-
-        # Compute one-sided power spectral density
-        n_freq = N // 2 + 1
-        psd = 2.0 * np.abs(fft_result[:n_freq]) ** 2 / (fs * N)
-        psd[0] *= 0.5  # DC component correction
-        psd[-1] *= 0.5  # Nyquist component correction
-
-        # Compute frequencies
-        freqs = np.fft.fftfreq(N, 1.0/fs)[:n_freq]
-
+        fs = 1.0 if fs is None else fs
+        if fs <= 0:
+            raise ValueError("fs must be positive")
+        if data.ndim != 1:
+            raise ValueError("spectral_analysis expects a one-dimensional signal")
+        if data.size == 0:
+            raise ValueError("spectral_analysis requires at least one sample")
+        window_func = signal.get_window(window, data.size)
+        fft_result = np.fft.rfft(data * window_func)
+        psd = (np.abs(fft_result) ** 2) / (fs * np.sum(window_func**2))
+        if data.size > 1:
+            if data.size % 2 == 0:
+                psd[1:-1] *= 2.0
+            else:
+                psd[1:] *= 2.0
+        freqs = np.fft.rfftfreq(data.size, d=1.0 / fs)
         return freqs, psd
-    
-    def spectral_filtering(self, data, cutoff, order=4, btype='low'):
-        """Apply Butterworth filtering (optimized).
 
-        Uses direct signal.filtfilt for minimal overhead.
-
-        Args:
-            data: Input signal
-            cutoff: Cutoff frequency
-            order: Filter order (default: 4)
-            btype: Filter type ('low', 'high', 'band', 'bandstop')
-
-        Returns:
-            Filtered signal
-        """
+    def spectral_filtering(self, data, cutoff, order=4, btype="low"):
+        """Apply a one-dimensional Butterworth digital filter with normalized cutoffs."""
         check_tier_access("spectral_filtering")
-
         data = np.asarray(data, dtype=np.float64)
+        if data.ndim != 1:
+            raise ValueError("spectral_filtering expects a one-dimensional signal")
+        if data.size == 0:
+            raise ValueError("spectral_filtering requires at least one sample")
+        if not isinstance(order, (int, np.integer)) or order <= 0:
+            raise ValueError("order must be a positive integer")
+        try:
+            b, a = signal.butter(order, cutoff, btype=btype)
+            return signal.filtfilt(b, a, data)
+        except ValueError as exc:
+            raise ValueError(f"invalid filter parameters or input: {exc}") from exc
 
-        # Design Butterworth filter (cached in scipy)
-        b, a = signal.butter(order, cutoff, btype=btype)
-
-        # Apply filter with minimal overhead
-        filtered = signal.filtfilt(b, a, data)
-        return filtered
-    
     def convolution(self, input_data, kernel, padding=0, stride=1, **kwargs):
-        """Perform convolution (CPU).
-        
-        Args:
-            input_data: Input tensor
-            kernel: Convolution kernel
-            padding: Padding amount
-            stride: Stride amount
-            
-        Returns:
-            Convolved result
-        """
+        """Perform one-dimensional same-mode convolution on the CPU."""
         check_tier_access("convolution")
-        
+        if not isinstance(stride, (int, np.integer)) or stride <= 0:
+            raise ValueError("stride must be a positive integer")
+        if not isinstance(padding, (int, np.integer)) or padding < 0:
+            raise ValueError("padding must be a non-negative integer")
         input_data = np.asarray(input_data)
         kernel = np.asarray(kernel)
-        
-        # Pad if necessary
+        if input_data.ndim != 1:
+            raise ValueError("convolution expects one-dimensional input_data")
+        if kernel.ndim != 1:
+            raise ValueError("convolution expects a one-dimensional kernel")
+        if input_data.size == 0 or kernel.size == 0:
+            raise ValueError("convolution requires non-empty input_data and kernel")
         if padding > 0:
-            input_data = np.pad(input_data, padding, mode='constant')
-        
-        # Simple 1D convolution for Tier 1
-        return signal.convolve(input_data, kernel, mode='same')
-    
+            input_data = np.pad(input_data, padding, mode="constant")
+        return signal.convolve(input_data, kernel, mode="same")[::stride]
+
     def linear_algebra_solve(self, A, b):
-        """Solve linear system Ax=b (CPU).
-        
-        Args:
-            A: Coefficient matrix
-            b: Right-hand side
-            
-        Returns:
-            Solution vector
-        """
+        """Solve a square linear system Ax=b on the CPU."""
         check_tier_access("linear_algebra")
-        
         A = np.asarray(A, dtype=np.float64)
         b = np.asarray(b, dtype=np.float64)
-        
-        return linalg.solve(A, b)
-    
+        if A.ndim != 2 or A.shape[0] != A.shape[1]:
+            raise ValueError("A must be a two-dimensional square matrix")
+        if b.ndim not in (1, 2) or b.shape[0] != A.shape[0]:
+            raise ValueError("b must have one or two dimensions with a matching row count")
+        try:
+            return linalg.solve(A, b)
+        except (ValueError, linalg.LinAlgError) as exc:
+            raise ValueError(f"linear system could not be solved: {exc}") from exc
+
     def matrix_multiply(self, A, B):
-        """Perform matrix multiplication (CPU).
-        
-        Args:
-            A: First matrix
-            B: Second matrix
-            
-        Returns:
-            Product matrix
-        """
+        """Perform two-dimensional matrix multiplication on the CPU."""
         check_tier_access("linear_algebra")
-        
+        A = np.asarray(A)
+        B = np.asarray(B)
+        if A.ndim != 2 or B.ndim != 2:
+            raise ValueError("matrix_multiply expects two-dimensional matrices")
+        if A.shape[1] != B.shape[0]:
+            raise ValueError("matrix dimensions are incompatible for multiplication")
         return np.matmul(A, B)
 
+
 class GPUBackend:
-    """GPU backend (NOT AVAILABLE IN TIER 1)."""
-    
+    """Placeholder for a future GPU backend; unavailable in Tier 1."""
+
     def __init__(self):
         raise TierFeatureBlockedError(
-            "GPU acceleration is not available in Tier 1 (free edition). "
-            "For GPU support, please upgrade to Tier 2+. "
-            "Visit https://[DOMAIN]/tiers for details or contact [SALES_EMAIL]"
+            "GPU acceleration is not implemented in this CPU-only Tier 1 distribution."
         )
 
-# Global backend instance
+
 _backend = None
 
+
 def get_backend():
-    """Get the Tier 1 CPU backend.
-    
-    Note: GPU backends are not available in this tier 1 distribution.
-    
-    Returns:
-        CPUBackend instance
-    """
+    """Get the Tier 1 CPU backend."""
     global _backend
     if _backend is None:
         _backend = CPUBackend()
     return _backend
 
+
 def set_backend(backend_type="cpu"):
-    """Set backend type (CPU only in Tier 1).
-    
-    Args:
-        backend_type: 'cpu' (only option for Tier 1)
-        
-    Raises:
-        TierFeatureBlockedError: If trying to use GPU backend
-    """
+    """Set the backend type; only the CPU backend is implemented."""
     if backend_type != "cpu":
         raise TierFeatureBlockedError(
-            f"Backend '{backend_type}' is not available in Tier 1. "
-            "Only CPU backend is available in this free edition. "
-            "For GPU acceleration, upgrade to Tier 2+."
+            f"Backend '{backend_type}' is not implemented in this CPU-only Tier 1 distribution."
         )
-    
     global _backend
     _backend = CPUBackend()
     return _backend
 
-__all__ = [
-    "CPUBackend",
-    "GPUBackend",
-    "get_backend",
-    "set_backend",
-]
+
+__all__ = ["CPUBackend", "GPUBackend", "get_backend", "set_backend"]

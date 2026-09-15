@@ -1,0 +1,191 @@
+"""Independent numerical checks for the Tier 1 CPU backend.
+
+These tests compare public computations with established NumPy/SciPy
+reference implementations rather than comparing the implementation to itself.
+"""
+
+import numpy as np
+from scipy import signal
+
+from crystalline.backend import CPUBackend
+from crystalline.kernels import spectral as kernel_spectral
+
+
+backend = CPUBackend()
+
+
+def _scipy_periodogram(data, fs, window):
+    return signal.periodogram(
+        np.asarray(data, dtype=np.float64),
+        fs=fs,
+        window=window,
+        detrend=False,
+        scaling="density",
+        return_onesided=True,
+    )
+
+
+def test_spectral_analysis_matches_scipy_even_length():
+    rng = np.random.default_rng(12345)
+    data = rng.normal(size=128)
+    fs = 200.0
+
+    freqs, psd = backend.spectral_analysis(data, fs=fs, window="hann")
+    ref_freqs, ref_psd = _scipy_periodogram(data, fs, "hann")
+
+    np.testing.assert_allclose(freqs, ref_freqs, rtol=0.0, atol=1e-14)
+    np.testing.assert_allclose(psd, ref_psd, rtol=1e-12, atol=1e-14)
+
+
+def test_spectral_analysis_matches_scipy_odd_length():
+    rng = np.random.default_rng(54321)
+    data = rng.normal(size=127)
+    fs = 100.0
+
+    freqs, psd = backend.spectral_analysis(data, fs=fs, window="hamming")
+    ref_freqs, ref_psd = _scipy_periodogram(data, fs, "hamming")
+
+    np.testing.assert_allclose(freqs, ref_freqs, rtol=0.0, atol=1e-14)
+    np.testing.assert_allclose(psd, ref_psd, rtol=1e-12, atol=1e-14)
+
+
+def test_spectral_analysis_rejects_invalid_sampling_rate():
+    data = np.ones(16)
+
+    for fs in (0.0, -1.0):
+        try:
+            backend.spectral_analysis(data, fs=fs)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("non-positive sampling rates must be rejected")
+
+
+def test_spectral_filtering_matches_scipy():
+    rng = np.random.default_rng(2026)
+    data = rng.normal(size=256)
+    cutoff = 0.2
+    order = 4
+
+    actual = backend.spectral_filtering(data, cutoff, order=order, btype="low")
+    b, a = signal.butter(order, cutoff, btype="low")
+    expected = signal.filtfilt(b, a, data)
+
+    np.testing.assert_allclose(actual, expected, rtol=1e-13, atol=1e-13)
+
+
+def test_spectral_filtering_rejects_non_one_dimensional_input():
+    with np.testing.assert_raises(ValueError):
+        backend.spectral_filtering(np.ones((2, 32)), cutoff=0.2)
+
+
+def test_spectral_filtering_rejects_nonpositive_order():
+    data = np.ones(64)
+    for order in (0, -1, 2.5):
+        with np.testing.assert_raises(ValueError):
+            backend.spectral_filtering(data, cutoff=0.2, order=order)
+
+
+def test_spectral_filtering_rejects_too_short_signal():
+    with np.testing.assert_raises(ValueError):
+        backend.spectral_filtering(np.ones(3), cutoff=0.2, order=4)
+
+
+def test_convolution_stride_is_applied():
+    data = np.arange(8, dtype=float)
+    kernel = np.array([1.0, 2.0, 1.0])
+
+    expected = signal.convolve(data, kernel, mode="same")[::2]
+    actual = backend.convolution(data, kernel, stride=2)
+
+    np.testing.assert_allclose(actual, expected)
+
+
+def test_convolution_rejects_nonpositive_stride():
+    data = np.arange(8, dtype=float)
+    kernel = np.array([1.0, 2.0, 1.0])
+
+    for stride in (0, -1):
+        try:
+            backend.convolution(data, kernel, stride=stride)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("stride must be a positive integer")
+
+
+def test_convolution_rejects_non_one_dimensional_input():
+    with np.testing.assert_raises(ValueError):
+        backend.convolution(np.ones((2, 4)), np.ones(3))
+    with np.testing.assert_raises(ValueError):
+        backend.convolution(np.ones(4), np.ones((2, 2)))
+
+
+def test_convolution_rejects_empty_inputs():
+    with np.testing.assert_raises(ValueError):
+        backend.convolution(np.array([]), np.ones(3))
+    with np.testing.assert_raises(ValueError):
+        backend.convolution(np.ones(3), np.array([]))
+
+
+def test_experimental_spectral_helper_matches_scipy():
+    rng = np.random.default_rng(7)
+    data = rng.normal(size=127)
+    fs = 50.0
+
+    actual_freqs, actual_psd = kernel_spectral.spectral_analysis(
+        data, fs=fs, window="hamming"
+    )
+    expected_freqs, expected_psd = _scipy_periodogram(data, fs, "hamming")
+
+    np.testing.assert_allclose(actual_freqs, expected_freqs, rtol=0.0, atol=1e-14)
+    np.testing.assert_allclose(actual_psd, expected_psd, rtol=1e-12, atol=1e-14)
+
+
+def test_experimental_periodogram_matches_scipy():
+    rng = np.random.default_rng(11)
+    data = rng.normal(size=129)
+    fs = 75.0
+
+    actual_freqs, actual_psd = kernel_spectral.periodogram(
+        data, fs=fs, window="hann"
+    )
+    expected_freqs, expected_psd = _scipy_periodogram(data, fs, "hann")
+
+    np.testing.assert_allclose(actual_freqs, expected_freqs, rtol=0.0, atol=1e-14)
+    np.testing.assert_allclose(actual_psd, expected_psd, rtol=1e-12, atol=1e-14)
+
+
+def test_experimental_rfft_rejects_empty_signal():
+    try:
+        kernel_spectral.rfft(np.array([]))
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("empty FFT input must be rejected")
+
+
+def test_experimental_stft_matches_scipy_with_explicit_return_order():
+    rng = np.random.default_rng(19)
+    data = rng.normal(size=96)
+    fs = 48.0
+    nperseg = 32
+    noverlap = 16
+
+    actual_times, actual_freqs, actual_coefficients = kernel_spectral.stft(
+        data, fs=fs, nperseg=nperseg, noverlap=noverlap
+    )
+    expected_freqs, expected_times, expected_coefficients = signal.stft(
+        data, fs=fs, window="hann", nperseg=nperseg, noverlap=noverlap
+    )
+
+    np.testing.assert_allclose(actual_times, expected_times)
+    np.testing.assert_allclose(actual_freqs, expected_freqs)
+    np.testing.assert_allclose(actual_coefficients, expected_coefficients)
+
+
+def test_experimental_stft_rejects_invalid_dimensions_and_overlap():
+    with np.testing.assert_raises(ValueError):
+        kernel_spectral.stft(np.ones((2, 32)))
+    with np.testing.assert_raises(ValueError):
+        kernel_spectral.stft(np.ones(32), nperseg=16, noverlap=16)
