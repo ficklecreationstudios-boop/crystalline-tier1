@@ -6,9 +6,13 @@ omits windowing, density normalization, and one-sided PSD construction.
 
 This script reports cold, warm, and stability timings. It does not assert that
 Crystalline is faster than another implementation; results are evidence for a
-specific environment only.
+specific environment only. The run metadata printed at startup records the
+software versions, platform, random seed, and iteration counts needed to
+interpret the timing evidence.
 """
 
+import platform
+import sys
 import time
 import warnings
 
@@ -22,6 +26,11 @@ try:
     HAS_TORCH = True
 except ImportError:
     HAS_TORCH = False
+
+
+SEED = 42
+WARM_RUNS = 20
+STABILITY_RUNS = 50
 
 
 class StabilityAnalyzer:
@@ -71,7 +80,7 @@ class StabilityAnalyzer:
         }
 
 
-def _measure(fn, warm_runs=20, stability_runs=50):
+def _measure(fn, warm_runs=WARM_RUNS, stability_runs=STABILITY_RUNS):
     start = time.perf_counter()
     fn()
     cold = (time.perf_counter() - start) * 1000
@@ -117,7 +126,7 @@ def benchmark_spectral_psd():
     sizes = [1024, 10240, 102400]
     for size in sizes:
         print(f"\nArray Size: {size:,} samples")
-        data = np.random.default_rng(42).normal(size=size).astype(np.float64)
+        data = np.random.default_rng(SEED).normal(size=size).astype(np.float64)
         results = {}
 
         def scipy_psd():
@@ -161,7 +170,7 @@ def benchmark_matrix_multiplication():
 
     for size in sizes:
         print(f"\nMatrix Size: {size}×{size}")
-        rng = np.random.default_rng(42)
+        rng = np.random.default_rng(SEED)
         A = rng.normal(size=(size, size)).astype(np.float64)
         B = rng.normal(size=(size, size)).astype(np.float64)
         results = {}
@@ -183,6 +192,16 @@ def benchmark_matrix_multiplication():
 if __name__ == "__main__":
     print("\nCRYSTALLINE TIER 1 — BASELINE COMPARISON")
     print("Timing is environment-specific evidence, not a blanket performance claim.")
+    print(f"Python: {sys.version.split()[0]}")
+    print(f"NumPy: {np.__version__}")
+    print(f"SciPy: {signal.__version__ if hasattr(signal, '__version__') else 'see scipy.__version__'}")
+    import scipy
+    print(f"SciPy version: {scipy.__version__}")
+    print(f"Platform: {platform.platform()}")
+    print(f"Machine: {platform.machine()}")
+    print(f"Random seed: {SEED}")
+    print(f"Warm runs: {WARM_RUNS}; stability runs: {STABILITY_RUNS}")
+    print(f"PyTorch available: {HAS_TORCH}")
     benchmark_spectral_psd()
     benchmark_matrix_multiplication()
     print("\nBenchmark complete.")
