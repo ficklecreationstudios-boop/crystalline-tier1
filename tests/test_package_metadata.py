@@ -1,5 +1,6 @@
 """Independent checks for package/runtime metadata consistency."""
 
+import importlib.metadata
 import os
 import subprocess
 import sys
@@ -10,6 +11,12 @@ import crystalline
 def test_runtime_version_matches_published_package_version():
     assert crystalline.__version__ == "5.0.1"
     assert crystalline.get_tier_info()["version"] == crystalline.__version__
+
+
+def test_distribution_metadata_declares_spdx_license_expression():
+    metadata = importlib.metadata.metadata("crystalline-tier1")
+    assert metadata["Version"] == crystalline.__version__
+    assert metadata["License-Expression"] == "GPL-3.0-only"
 
 
 def test_import_does_not_mutate_tier_environment():
