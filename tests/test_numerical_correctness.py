@@ -111,6 +111,20 @@ def test_experimental_spectral_helper_matches_scipy():
     np.testing.assert_allclose(actual_psd, expected_psd, rtol=1e-12, atol=1e-14)
 
 
+def test_experimental_periodogram_matches_scipy():
+    rng = np.random.default_rng(11)
+    data = rng.normal(size=129)
+    fs = 75.0
+
+    actual_freqs, actual_psd = kernel_spectral.periodogram(
+        data, fs=fs, window="hann"
+    )
+    expected_freqs, expected_psd = _scipy_periodogram(data, fs, "hann")
+
+    np.testing.assert_allclose(actual_freqs, expected_freqs, rtol=0.0, atol=1e-14)
+    np.testing.assert_allclose(actual_psd, expected_psd, rtol=1e-12, atol=1e-14)
+
+
 def test_experimental_rfft_rejects_empty_signal():
     try:
         kernel_spectral.rfft(np.array([]))
