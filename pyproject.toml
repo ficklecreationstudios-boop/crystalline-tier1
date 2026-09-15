@@ -1,16 +1,16 @@
 [project]
 name = "crystalline-tier1"
-version = "5.0.0"
-description = "Crystalline GPU - Tier 1 (Free, CPU-only Edition)"
+version = "5.0.1"
+description = "CPU numerical and signal-processing utilities for the Crystalline Tier 1 edition"
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "GPL-3.0"}
 authors = [
-    {name = "Crystalline Project", email = "support@example.com"}
+    {name = "Crystalline Project Contributors"}
 ]
-keywords = ["gpu", "acceleration", "spectral", "linear-algebra", "cpu"]
+keywords = ["spectral-analysis", "linear-algebra", "signal-processing", "cpu", "scientific-computing"]
 classifiers = [
-    "Development Status :: 5 - Production/Stable",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
@@ -29,10 +29,10 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/yourusername/crystalline-tier1"
-"Bug Tracker" = "https://github.com/yourusername/crystalline-tier1/issues"
-Documentation = "https://github.com/yourusername/crystalline-tier1/docs"
-"Source Code" = "https://github.com/yourusername/crystalline-tier1"
+Homepage = "https://github.com/ficklecreationstudios-boop/crystalline-tier1"
+"Bug Tracker" = "https://github.com/ficklecreationstudios-boop/crystalline-tier1/issues"
+Documentation = "https://github.com/ficklecreationstudios-boop/crystalline-tier1/tree/main/docs"
+"Source Code" = "https://github.com/ficklecreationstudios-boop/crystalline-tier1"
 
 [project.optional-dependencies]
 dev = [
