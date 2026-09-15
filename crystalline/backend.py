@@ -1,9 +1,6 @@
 """
 crystalline/backend.py
-Backend management for Tier 1 (CPU only)
-
-This module manages the computation backend. In Tier 1, only CPU
-operations are available.
+Backend management for Tier 1 (CPU only).
 """
 
 import numpy as np
@@ -24,8 +21,6 @@ class CPUBackend:
 
         The result follows the numerical convention of
         ``scipy.signal.periodogram(..., detrend=False, scaling='density')``.
-        This implementation performs the FFT directly while applying the
-        same window-power normalization and one-sided endpoint rules.
         """
         check_tier_access("spectral_analysis")
 
@@ -59,7 +54,11 @@ class CPUBackend:
         return freqs, psd
 
     def spectral_filtering(self, data, cutoff, order=4, btype="low"):
-        """Apply Butterworth filtering (CPU)."""
+        """Apply a Butterworth digital filter with normalized cutoffs.
+
+        Scalar cutoffs and band edges follow SciPy's normalized convention:
+        values must lie strictly between 0 and 1, where 1 is Nyquist.
+        """
         check_tier_access("spectral_filtering")
         data = np.asarray(data, dtype=np.float64)
         b, a = signal.butter(order, cutoff, btype=btype)
