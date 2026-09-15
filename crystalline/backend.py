@@ -7,7 +7,7 @@ operations are available.
 """
 
 import numpy as np
-from scipy import fft, linalg, signal
+from scipy import linalg, signal
 from crystalline.licensing import TierFeatureBlockedError, check_tier_access
 
 
@@ -26,14 +26,6 @@ class CPUBackend:
         ``scipy.signal.periodogram(..., detrend=False, scaling='density')``.
         This implementation performs the FFT directly while applying the
         same window-power normalization and one-sided endpoint rules.
-
-        Args:
-            data: Input signal.
-            fs: Sampling frequency (default: 1.0). Must be positive.
-            window: Window specification accepted by ``scipy.signal.get_window``.
-
-        Returns:
-            Tuple of (frequencies, power_spectral_density).
         """
         check_tier_access("spectral_analysis")
 
@@ -67,19 +59,8 @@ class CPUBackend:
         return freqs, psd
 
     def spectral_filtering(self, data, cutoff, order=4, btype="low"):
-        """Apply Butterworth filtering (CPU).
-
-        Args:
-            data: Input signal
-            cutoff: Cutoff frequency
-            order: Filter order (default: 4)
-            btype: Filter type ('low', 'high', 'band', 'bandstop')
-
-        Returns:
-            Filtered signal
-        """
+        """Apply Butterworth filtering (CPU)."""
         check_tier_access("spectral_filtering")
-
         data = np.asarray(data, dtype=np.float64)
         b, a = signal.butter(order, cutoff, btype=btype)
         return signal.filtfilt(b, a, data)
@@ -130,7 +111,6 @@ class GPUBackend:
         )
 
 
-# Global backend instance
 _backend = None
 
 
