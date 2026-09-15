@@ -163,3 +163,29 @@ def test_experimental_rfft_rejects_empty_signal():
         pass
     else:
         raise AssertionError("empty FFT input must be rejected")
+
+
+def test_experimental_stft_matches_scipy_with_explicit_return_order():
+    rng = np.random.default_rng(19)
+    data = rng.normal(size=96)
+    fs = 48.0
+    nperseg = 32
+    noverlap = 16
+
+    actual_times, actual_freqs, actual_coefficients = kernel_spectral.stft(
+        data, fs=fs, nperseg=nperseg, noverlap=noverlap
+    )
+    expected_freqs, expected_times, expected_coefficients = signal.stft(
+        data, fs=fs, window="hann", nperseg=nperseg, noverlap=noverlap
+    )
+
+    np.testing.assert_allclose(actual_times, expected_times)
+    np.testing.assert_allclose(actual_freqs, expected_freqs)
+    np.testing.assert_allclose(actual_coefficients, expected_coefficients)
+
+
+def test_experimental_stft_rejects_invalid_dimensions_and_overlap():
+    with np.testing.assert_raises(ValueError):
+        kernel_spectral.stft(np.ones((2, 32)))
+    with np.testing.assert_raises(ValueError):
+        kernel_spectral.stft(np.ones(32), nperseg=16, noverlap=16)
