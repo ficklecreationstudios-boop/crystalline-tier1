@@ -101,11 +101,7 @@ def spectral_analysis(
     fs: float = 1.0,
     window: str = "hamming",
 ) -> Tuple[np.ndarray, np.ndarray]:
-    """Compute one-sided density-scaled PSD using the Tier 1 convention.
-
-    The numerical convention matches ``scipy.signal.periodogram`` with
-    ``detrend=False`` and ``scaling='density'``.
-    """
+    """Compute one-sided density-scaled PSD using the Tier 1 convention."""
     data = np.asarray(data, dtype=np.float64)
     if fs <= 0:
         raise ValueError("fs must be positive")
@@ -135,9 +131,12 @@ def rfft(data: np.ndarray, fs: float = 1.0) -> Tuple[np.ndarray, np.ndarray]:
     data = np.asarray(data, dtype=np.float64)
     if fs <= 0:
         raise ValueError("fs must be positive")
-    N = len(data)
+    if data.ndim != 1:
+        raise ValueError("rfft expects a one-dimensional signal")
+    if data.size == 0:
+        raise ValueError("rfft requires at least one sample")
     fft_result = np.fft.rfft(data)
-    freqs = np.fft.rfftfreq(N, 1.0 / fs)
+    freqs = np.fft.rfftfreq(data.size, 1.0 / fs)
     return freqs, fft_result
 
 
@@ -151,9 +150,10 @@ def periodogram(
     fs: float = 1.0,
     window: str = "hamming",
 ) -> Tuple[np.ndarray, np.ndarray]:
-    """Compute a Welch PSD using SciPy."""
-    freqs, psd = signal.welch(data, fs=fs, window=window)
-    return freqs, psd
+    """Compute a Welch PSD using SciPy's ``signal.welch`` convention."""
+    if fs <= 0:
+        raise ValueError("fs must be positive")
+    return signal.welch(data, fs=fs, window=window)
 
 
 def stft(
@@ -164,6 +164,12 @@ def stft(
     noverlap: Optional[int] = None,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Compute a short-time Fourier transform using SciPy."""
+    if fs <= 0:
+        raise ValueError("fs must be positive")
+    if nperseg <= 0:
+        raise ValueError("nperseg must be positive")
+    if noverlap is not None and not 0 <= noverlap < nperseg:
+        raise ValueError("noverlap must satisfy 0 <= noverlap < nperseg")
     if noverlap is None:
         noverlap = nperseg // 2
     freqs, times, Sxx = signal.stft(
