@@ -7,6 +7,5 @@ scipy>=1.5.0
 
 # Optional development/test dependencies are declared in pyproject.toml.
 # Optional visualization dependencies are declared in pyproject.toml.
-# Numba is intentionally not a runtime dependency; no performance claim is
-# made for the experimental source-visible helpers that can use it when
-# installed separately.
+# Numba is not a runtime dependency and is not used by the current Tier 1
+# implementation. No Numba JIT or CUDA execution path is provided here.
