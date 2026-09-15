@@ -6,7 +6,7 @@ Thank you for your interest in contributing to Crystalline GPU Tier 1! This is a
 
 ### Reporting Bugs
 
-1. Check [existing issues](https://github.com/yourusername/crystalline-tier1/issues)
+1. Check [existing issues](https://github.com/ficklecreationstudios-boop/crystalline-tier1/issues)
 2. Create a new issue with:
    - Clear title
    - Description of the bug
@@ -48,15 +48,15 @@ Thank you for your interest in contributing to Crystalline GPU Tier 1! This is a
 ```python
 def spectral_analysis(data, fs=None, window='hamming'):
     """Perform spectral analysis using FFT.
-    
+
     Args:
         data: Input signal (numpy array)
         fs: Sampling frequency (default: 1.0)
         window: Window function (default: 'hamming')
-        
+
     Returns:
         Tuple of (frequencies, power_spectral_density)
-        
+
     Example:
         >>> freqs, psd = spectral_analysis(data, fs=100.0)
     """
@@ -72,12 +72,12 @@ def spectral_analysis(data, fs=None, window='hamming'):
 
 ```bash
 # Clone your fork
-git clone https://github.com/yourusername/crystalline-tier1.git
+git clone https://github.com/ficklecreationstudios-boop/crystalline-tier1.git
 cd crystalline-tier1
 
 # Create virtual environment
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate  # On Windows: venv\\Scripts\\activate
 
 # Install in development mode
 pip install -e ".[dev]"
@@ -94,14 +94,14 @@ flake8 .
 
 This is a **free, open-source Tier 1** project. When contributing:
 
-✅ **DO:**
+**DO:**
 - Keep features CPU-based (no GPU code)
 - Use NumPy, SciPy, Python stdlib only
 - Maintain GPL-3.0 license compliance
 - Document tier restrictions clearly
 - Help improve core algorithms
 
-❌ **DON'T:**
+**DON'T:**
 - Add GPU code or CUDA dependencies
 - Add commercial licensing code
 - Include code from higher tiers
@@ -146,10 +146,8 @@ By contributing, you agree that your contributions will be licensed under GPL-3.
 
 ## Questions?
 
-- Open an issue
-- Start a discussion
-- Email: [CONTACT_EMAIL]
+- Open an issue or discussion in the repository.
 
 ---
 
-**Thank you for contributing to Crystalline GPU Tier 1!** 🎉
+**Thank you for contributing to Crystalline GPU Tier 1!**
