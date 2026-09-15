@@ -9,25 +9,20 @@ import numpy as np
 from scipy import signal
 from typing import Tuple, Optional
 
-try:
-    from numba import njit
-    HAS_NUMBA = True
-except ImportError:
-    HAS_NUMBA = False
-
-    def njit(func):
-        return func
-
 
 class WindowCache:
-    """Cache window functions to avoid repeated construction."""
+    """Cache SciPy-compatible window functions to avoid repeated construction."""
 
     def __init__(self, max_size: int = 128):
+        if not isinstance(max_size, int) or max_size <= 0:
+            raise ValueError("max_size must be a positive integer")
         self.max_size = max_size
         self._cache = {}
 
     def get(self, window: str, length: int) -> np.ndarray:
-        """Get or create a window function."""
+        """Get or create a SciPy-compatible window function."""
+        if not isinstance(length, int) or length <= 0:
+            raise ValueError("length must be a positive integer")
         key = (window, length)
         if key not in self._cache:
             if len(self._cache) >= self.max_size:
@@ -41,59 +36,6 @@ class WindowCache:
 
 
 _window_cache = WindowCache()
-
-
-if HAS_NUMBA:
-    @njit
-    def _hamming_window(N: int) -> np.ndarray:
-        result = np.zeros(N, dtype=np.float64)
-        if N == 1:
-            result[0] = 1.0
-            return result
-        for i in range(N):
-            result[i] = 0.54 - 0.46 * np.cos(2.0 * np.pi * i / (N - 1))
-        return result
-
-    @njit
-    def _hann_window(N: int) -> np.ndarray:
-        result = np.zeros(N, dtype=np.float64)
-        if N == 1:
-            result[0] = 1.0
-            return result
-        for i in range(N):
-            result[i] = 0.5 - 0.5 * np.cos(2.0 * np.pi * i / (N - 1))
-        return result
-
-    @njit
-    def _blackman_window(N: int) -> np.ndarray:
-        result = np.zeros(N, dtype=np.float64)
-        if N == 1:
-            result[0] = 1.0
-            return result
-        for i in range(N):
-            result[i] = (
-                0.42
-                - 0.5 * np.cos(2.0 * np.pi * i / (N - 1))
-                + 0.08 * np.cos(4.0 * np.pi * i / (N - 1))
-            )
-        return result
-
-    @njit
-    def _apply_window_jit(data: np.ndarray, window: np.ndarray) -> np.ndarray:
-        return data * window
-
-    def _get_window_numba(window_name: str, N: int) -> Optional[np.ndarray]:
-        if window_name == "hamming":
-            return _hamming_window(N)
-        if window_name == "hann":
-            return _hann_window(N)
-        if window_name == "blackman":
-            return _blackman_window(N)
-        return None
-
-else:
-    def _get_window_numba(window_name: str, N: int) -> None:
-        return None
 
 
 def spectral_analysis(
@@ -180,19 +122,31 @@ def stft(
     nperseg: int = 256,
     noverlap: Optional[int] = None,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Compute a short-time Fourier transform using SciPy."""
+    """Compute an STFT and return ``(times, frequencies, coefficients)``.
+
+    This helper intentionally uses a different return order from SciPy's
+    ``signal.stft`` (which returns ``(frequencies, times, coefficients)``).
+    The ordering is part of this helper's explicit contract.
+    """
+    data = np.asarray(data, dtype=np.float64)
+    if data.ndim != 1:
+        raise ValueError("stft expects a one-dimensional signal")
+    if data.size == 0:
+        raise ValueError("stft requires at least one sample")
     if fs <= 0:
         raise ValueError("fs must be positive")
-    if nperseg <= 0:
-        raise ValueError("nperseg must be positive")
+    if not isinstance(nperseg, (int, np.integer)) or nperseg <= 0:
+        raise ValueError("nperseg must be a positive integer")
+    if noverlap is not None and not isinstance(noverlap, (int, np.integer)):
+        raise ValueError("noverlap must be an integer or None")
     if noverlap is not None and not 0 <= noverlap < nperseg:
         raise ValueError("noverlap must satisfy 0 <= noverlap < nperseg")
     if noverlap is None:
         noverlap = nperseg // 2
-    freqs, times, Sxx = signal.stft(
+    freqs, times, coefficients = signal.stft(
         data, fs=fs, window=window, nperseg=nperseg, noverlap=noverlap
     )
-    return times, freqs, Sxx
+    return times, freqs, coefficients
 
 
 __all__ = [
