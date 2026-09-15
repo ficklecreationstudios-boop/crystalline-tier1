@@ -1,23 +1,12 @@
-# Crystalline GPU - Tier 1 (Free Edition) Requirements
+# CPU-only Crystalline Tier 1 runtime requirements
 # Python 3.10+ required
 
-# Core Dependencies
+# Core numerical dependencies
 numpy>=1.19.0
 scipy>=1.5.0
 
-# Network & Configuration
-requests>=2.25.0
-pyyaml>=5.4.0
-
-# Optional: Performance Optimization
-# numba>=0.56.0  # JIT compilation for spectral kernels (10-50x faster on repeated calls)
-
-# Optional: Visualization (for tutorials and examples)
-# matplotlib>=3.3.0
-# TensorBoard>=2.4.0
-
-# Optional: Development & Testing
-# pytest>=7.0.0
-# pytest-cov>=3.0.0
-# black>=22.0.0
-# flake8>=4.0.0
+# Optional development/test dependencies are declared in pyproject.toml.
+# Optional visualization dependencies are declared in pyproject.toml.
+# Numba is intentionally not a runtime dependency; no performance claim is
+# made for the experimental source-visible helpers that can use it when
+# installed separately.
