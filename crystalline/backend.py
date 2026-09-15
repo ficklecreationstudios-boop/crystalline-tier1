@@ -7,66 +7,67 @@ operations are available.
 """
 
 import numpy as np
-from scipy import signal, fft, linalg
-from crystalline.licensing import check_tier_access, TierFeatureBlockedError
+from scipy import fft, linalg, signal
+from crystalline.licensing import TierFeatureBlockedError, check_tier_access
+
 
 class CPUBackend:
     """CPU-only backend for Tier 1."""
-    
+
     def __init__(self):
         self.device = "cpu"
         self.gpu_available = False
         self.tier = "TIER_1_FREE"
-    
-    def spectral_analysis(self, data, fs=None, window='hamming'):
-        """Perform spectral analysis using direct NumPy FFT (optimized).
 
-        Uses direct FFT instead of periodogram for better performance on
-        small-to-medium arrays. ~10x faster than scipy.signal.periodogram.
+    def spectral_analysis(self, data, fs=None, window="hamming"):
+        """Compute a one-sided, density-scaled power spectral density.
+
+        The result follows the numerical convention of
+        ``scipy.signal.periodogram(..., detrend=False, scaling='density')``.
+        This implementation performs the FFT directly while applying the
+        same window-power normalization and one-sided endpoint rules.
 
         Args:
-            data: Input signal
-            fs: Sampling frequency (default: 1.0)
-            window: Window function (default: 'hamming')
+            data: Input signal.
+            fs: Sampling frequency (default: 1.0). Must be positive.
+            window: Window specification accepted by ``scipy.signal.get_window``.
 
         Returns:
-            Tuple of (frequencies, power_spectral_density)
+            Tuple of (frequencies, power_spectral_density).
         """
         check_tier_access("spectral_analysis")
 
         data = np.asarray(data, dtype=np.float64)
         if fs is None:
             fs = 1.0
+        if fs <= 0:
+            raise ValueError("fs must be positive")
+        if data.ndim != 1:
+            raise ValueError("spectral_analysis expects a one-dimensional signal")
+        if data.size == 0:
+            raise ValueError("spectral_analysis requires at least one sample")
 
-        N = len(data)
-
-        # Apply window function directly (faster than periodogram wrapper)
-        try:
-            window_func = signal.get_window(window, N)
-        except ValueError:
-            # Fallback to hamming if window not found
-            window_func = signal.get_window('hamming', N)
-
+        n_samples = data.size
+        window_func = signal.get_window(window, n_samples)
         windowed_data = data * window_func
 
-        # Direct FFT computation (no periodogram overhead)
-        fft_result = np.fft.fft(windowed_data)
+        fft_result = np.fft.rfft(windowed_data)
+        window_power = np.sum(window_func**2)
+        psd = (np.abs(fft_result) ** 2) / (fs * window_power)
 
-        # Compute one-sided power spectral density
-        n_freq = N // 2 + 1
-        psd = 2.0 * np.abs(fft_result[:n_freq]) ** 2 / (fs * N)
-        psd[0] *= 0.5  # DC component correction
-        psd[-1] *= 0.5  # Nyquist component correction
+        # Double positive-frequency bins, excluding DC and (for even N)
+        # Nyquist. For odd N, the final bin is not a Nyquist bin.
+        if n_samples > 1:
+            if n_samples % 2 == 0:
+                psd[1:-1] *= 2.0
+            else:
+                psd[1:] *= 2.0
 
-        # Compute frequencies
-        freqs = np.fft.fftfreq(N, 1.0/fs)[:n_freq]
-
+        freqs = np.fft.rfftfreq(n_samples, d=1.0 / fs)
         return freqs, psd
-    
-    def spectral_filtering(self, data, cutoff, order=4, btype='low'):
-        """Apply Butterworth filtering (optimized).
 
-        Uses direct signal.filtfilt for minimal overhead.
+    def spectral_filtering(self, data, cutoff, order=4, btype="low"):
+        """Apply Butterworth filtering (CPU).
 
         Args:
             data: Input signal
@@ -80,114 +81,80 @@ class CPUBackend:
         check_tier_access("spectral_filtering")
 
         data = np.asarray(data, dtype=np.float64)
-
-        # Design Butterworth filter (cached in scipy)
         b, a = signal.butter(order, cutoff, btype=btype)
+        return signal.filtfilt(b, a, data)
 
-        # Apply filter with minimal overhead
-        filtered = signal.filtfilt(b, a, data)
-        return filtered
-    
     def convolution(self, input_data, kernel, padding=0, stride=1, **kwargs):
-        """Perform convolution (CPU).
-        
-        Args:
-            input_data: Input tensor
-            kernel: Convolution kernel
-            padding: Padding amount
-            stride: Stride amount
-            
-        Returns:
-            Convolved result
+        """Perform one-dimensional convolution on the CPU.
+
+        ``mode='same'`` is retained for compatibility with the original Tier 1
+        API. Padding is applied before convolution, and stride selects every
+        ``stride``-th result from the same-mode output.
         """
         check_tier_access("convolution")
-        
+
+        if not isinstance(stride, (int, np.integer)) or stride <= 0:
+            raise ValueError("stride must be a positive integer")
+        if not isinstance(padding, (int, np.integer)) or padding < 0:
+            raise ValueError("padding must be a non-negative integer")
+
         input_data = np.asarray(input_data)
         kernel = np.asarray(kernel)
-        
-        # Pad if necessary
+
         if padding > 0:
-            input_data = np.pad(input_data, padding, mode='constant')
-        
-        # Simple 1D convolution for Tier 1
-        return signal.convolve(input_data, kernel, mode='same')
-    
+            input_data = np.pad(input_data, padding, mode="constant")
+
+        result = signal.convolve(input_data, kernel, mode="same")
+        return result[::stride]
+
     def linear_algebra_solve(self, A, b):
-        """Solve linear system Ax=b (CPU).
-        
-        Args:
-            A: Coefficient matrix
-            b: Right-hand side
-            
-        Returns:
-            Solution vector
-        """
+        """Solve linear system Ax=b (CPU)."""
         check_tier_access("linear_algebra")
-        
         A = np.asarray(A, dtype=np.float64)
         b = np.asarray(b, dtype=np.float64)
-        
         return linalg.solve(A, b)
-    
+
     def matrix_multiply(self, A, B):
-        """Perform matrix multiplication (CPU).
-        
-        Args:
-            A: First matrix
-            B: Second matrix
-            
-        Returns:
-            Product matrix
-        """
+        """Perform matrix multiplication (CPU)."""
         check_tier_access("linear_algebra")
-        
         return np.matmul(A, B)
+
 
 class GPUBackend:
     """GPU backend (NOT AVAILABLE IN TIER 1)."""
-    
+
     def __init__(self):
         raise TierFeatureBlockedError(
             "GPU acceleration is not available in Tier 1 (free edition). "
-            "For GPU support, please upgrade to Tier 2+. "
-            "Visit https://[DOMAIN]/tiers for details or contact [SALES_EMAIL]"
+            "For GPU support, please upgrade to Tier 2+."
         )
+
 
 # Global backend instance
 _backend = None
 
+
 def get_backend():
-    """Get the Tier 1 CPU backend.
-    
-    Note: GPU backends are not available in this tier 1 distribution.
-    
-    Returns:
-        CPUBackend instance
-    """
+    """Get the Tier 1 CPU backend."""
     global _backend
     if _backend is None:
         _backend = CPUBackend()
     return _backend
 
+
 def set_backend(backend_type="cpu"):
-    """Set backend type (CPU only in Tier 1).
-    
-    Args:
-        backend_type: 'cpu' (only option for Tier 1)
-        
-    Raises:
-        TierFeatureBlockedError: If trying to use GPU backend
-    """
+    """Set backend type (CPU only in Tier 1)."""
     if backend_type != "cpu":
         raise TierFeatureBlockedError(
             f"Backend '{backend_type}' is not available in Tier 1. "
             "Only CPU backend is available in this free edition. "
             "For GPU acceleration, upgrade to Tier 2+."
         )
-    
+
     global _backend
     _backend = CPUBackend()
     return _backend
+
 
 __all__ = [
     "CPUBackend",
