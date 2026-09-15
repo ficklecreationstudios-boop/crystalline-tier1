@@ -8,7 +8,7 @@ available in Tier 1.
 import numpy as np
 from crystalline import get_backend
 
-print("📐 Linear Algebra Example")
+print("Linear Algebra Example")
 print("=" * 50)
 
 # Get the Tier 1 CPU backend
@@ -17,7 +17,7 @@ print(f"Backend: {backend.device}")
 print(f"GPU Available: {backend.gpu_available}")
 print(f"Tier: {backend.tier}")
 
-print("\n1️⃣  Matrix Multiplication")
+print("\n1. Matrix Multiplication")
 print("-" * 50)
 
 # Create sample matrices
@@ -43,7 +43,7 @@ C = backend.matrix_multiply(A, B)
 print("\nResult (A @ B):")
 print(C)
 
-print("\n2️⃣  Solving Linear Systems")
+print("\n2. Solving Linear Systems")
 print("-" * 50)
 
 # Create a system: Ax = b
@@ -68,7 +68,7 @@ print("\nSolution x =", x)
 residual = np.linalg.norm(A_system @ x - b)
 print(f"Residual (verification): {residual:.2e}")
 
-print("\n3️⃣  Convolution")
+print("\n3. Convolution")
 print("-" * 50)
 
 # Example: smooth a signal with a kernel
@@ -82,5 +82,5 @@ print("Kernel:", kernel)
 smoothed = backend.convolution(signal, kernel, padding=1)
 print("Smoothed:", smoothed)
 
-print("\n✅ All operations completed!")
-print("💡 Tier 1 uses NumPy/SciPy for CPU computation")
+print("\nAll operations completed!")
+print("Tier 1 uses NumPy/SciPy for CPU computation")
