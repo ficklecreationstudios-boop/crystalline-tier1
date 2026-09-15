@@ -24,7 +24,11 @@ Every public claim must be one of:
 | Filtering accepts physical Hz cutoffs | Unsupported by the API | Corrected documentation/examples to normalized SciPy cutoffs because no sampling-frequency parameter exists. |
 | Experimental spectral helper is a faster optimized path | Unsupported | Removed performance positioning; kept it source-visible and correctness-aligned. |
 | Tier 1 is universally faster / 10x faster / within 10–20% | Unsupported | Removed from current public positioning; historical artifacts quarantined. |
-| Tier 1 has GPU execution | False | Explicitly unavailable. |
+| Tier 1 has GPU execution | False | Explicitly unavailable. `GPUBackend` is a blocking placeholder; `get_backend()` and `set_backend()` dispatch only to the CPU backend. |
+| Repository contains a Numba CUDA/JIT execution path | False | No current Tier 1 Numba import, dependency, JIT decorator, CUDA kernel, or dispatch path was found. Requirements now state this explicitly. |
+| Repository contains a CuPy execution path | False | No current Tier 1 CuPy dependency, import, backend, or dispatch path was found. |
+| PyTorch provides a Crystalline GPU execution path | False | PyTorch appears only as an optional historical/current benchmark comparator. The current reproducible benchmark uses CPU PyTorch operations when installed and does not dispatch Crystalline operations through PyTorch or CUDA. |
+| Historical benchmark scripts prove GPU execution | False | Historical scripts were reviewed and found to benchmark CPU implementations/comparators; archive status is retained and GPU conclusions remain quarantined. |
 | Higher-tier prices/performance targets are established by this repository | Unsupported | Removed from Tier 1 documentation. |
 | Production readiness is established by historical timings | Unsupported | Removed. |
 | Package metadata can drift between `setup.py` and `pyproject.toml` | Prevented | `setup.py` is now a metadata-free compatibility shim; `pyproject.toml` is the single metadata source. |
@@ -32,6 +36,23 @@ Every public claim must be one of:
 | Public examples reflect the current API | Verified after correction | Examples were audited; the spectral example handles optional plotting correctly and displays the full PSD range; the linear-algebra example no longer advertises an unsupported higher-tier upgrade. All four examples have CI smoke coverage, including Windows console execution. |
 | Reproducible spectral performance advantage exists | Benchmark-specific | Latest green CI run `34987294718` measured Crystalline median times of 0.046 ms, 0.214 ms, and 3.709 ms for 1,024, 10,240, and 102,400 samples versus 0.198 ms, 1.005 ms, and 11.944 ms for equivalent SciPy periodogram semantics. |
 | Matrix multiplication is independently accelerated | Unsupported | Latest CI benchmark measured approximately parity with NumPy at 256² and 1024²; no acceleration claim is made. |
+
+## GPU/CUDA/accelerator trace
+
+The remediation branch was traced across its repository tree and executable source/benchmark paths. The current architecture is CPU-only:
+
+1. `crystalline.backend.CPUBackend` implements every available Tier 1 operation with NumPy/SciPy.
+2. `crystalline.backend.GPUBackend` is a deliberate blocking placeholder that raises `TierFeatureBlockedError` on construction.
+3. `get_backend()` always returns `CPUBackend`; `set_backend()` rejects every backend name other than `cpu`.
+4. `crystalline.licensing.TIER_FEATURES` explicitly marks `gpu_acceleration` and `jit_compilation` false.
+5. `crystalline.get_tier_info()` reports `gpu_available=False` and `jit_available=False`.
+6. `crystalline/kernels/` is a CPU kernel inventory; its unavailable inventory explicitly lists GPU operations as not implemented.
+7. `crystalline/kernels/spectral.py` contains NumPy/SciPy CPU helpers only. There is no current Numba decorator, CUDA kernel, CuPy array path, PyTorch dispatch, or device-selection logic.
+8. `requirements.txt` contains only NumPy/SciPy runtime dependencies; it now explicitly states that Numba is not used by the current implementation.
+9. PyTorch is imported only conditionally by the reproducible benchmark as an external comparator. Its current benchmark uses CPU tensors and explicitly omits raw PyTorch FFT as a non-equivalent PSD comparison.
+10. The historical benchmark archive contains older CPU comparison code and stale naming such as “Crystalline GPU Tier 1”; those artifacts are quarantined for provenance and are not current runtime evidence.
+
+Therefore there is **no latent GPU backend in the current branch that can honestly be called E2E-tested**. A real GPU E2E program would require a new implementation, dependency/toolchain policy, backend dispatch, numerical parity tests, GPU-capable CI/test infrastructure, and independent GPU benchmarks before GPU support could be claimed.
 
 ## Benchmark gate
 
