@@ -26,7 +26,7 @@ rng = np.random.default_rng(0)
 noise = 0.1 * rng.standard_normal(len(t))
 signal = signal + noise
 
-print("📊 Spectral Analysis Example")
+print("Spectral Analysis Example")
 print(f"Sample rate: {fs} Hz")
 print(f"Signal duration: {duration} seconds")
 print("Signal components: 50 Hz, 120 Hz, 250 Hz")
