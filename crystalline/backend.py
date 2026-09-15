@@ -101,12 +101,11 @@ class CPUBackend:
 
 
 class GPUBackend:
-    """GPU backend (NOT AVAILABLE IN TIER 1)."""
+    """Placeholder for a future GPU backend; unavailable in Tier 1."""
 
     def __init__(self):
         raise TierFeatureBlockedError(
-            "GPU acceleration is not available in Tier 1 (free edition). "
-            "For GPU support, please upgrade to Tier 2+."
+            "GPU acceleration is not implemented in this CPU-only Tier 1 distribution."
         )
 
 
@@ -122,12 +121,10 @@ def get_backend():
 
 
 def set_backend(backend_type="cpu"):
-    """Set backend type (CPU only in Tier 1)."""
+    """Set the backend type; only the CPU backend is implemented."""
     if backend_type != "cpu":
         raise TierFeatureBlockedError(
-            f"Backend '{backend_type}' is not available in Tier 1. "
-            "Only CPU backend is available in this free edition. "
-            "For GPU acceleration, upgrade to Tier 2+."
+            f"Backend '{backend_type}' is not implemented in this CPU-only Tier 1 distribution."
         )
 
     global _backend
