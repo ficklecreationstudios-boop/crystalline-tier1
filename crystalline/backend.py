@@ -54,15 +54,29 @@ class CPUBackend:
         return freqs, psd
 
     def spectral_filtering(self, data, cutoff, order=4, btype="low"):
-        """Apply a Butterworth digital filter with normalized cutoffs.
+        """Apply a one-dimensional Butterworth digital filter.
 
-        Scalar cutoffs and band edges follow SciPy's normalized convention:
-        values must lie strictly between 0 and 1, where 1 is Nyquist.
+        ``cutoff`` follows SciPy's normalized digital-filter convention:
+        scalar cutoffs and band edges must lie strictly between 0 and 1,
+        where 1 is the Nyquist frequency. The public Tier 1 filtering API
+        accepts one-dimensional signals only.
         """
         check_tier_access("spectral_filtering")
         data = np.asarray(data, dtype=np.float64)
+        if data.ndim != 1:
+            raise ValueError("spectral_filtering expects a one-dimensional signal")
+        if data.size == 0:
+            raise ValueError("spectral_filtering requires at least one sample")
+        if not isinstance(order, (int, np.integer)) or order <= 0:
+            raise ValueError("order must be a positive integer")
+
         b, a = signal.butter(order, cutoff, btype=btype)
-        return signal.filtfilt(b, a, data)
+        try:
+            return signal.filtfilt(b, a, data)
+        except ValueError as exc:
+            raise ValueError(
+                "input signal is too short for the requested Butterworth filter"
+            ) from exc
 
     def convolution(self, input_data, kernel, padding=0, stride=1, **kwargs):
         """Perform one-dimensional convolution on the CPU.
@@ -80,6 +94,12 @@ class CPUBackend:
 
         input_data = np.asarray(input_data)
         kernel = np.asarray(kernel)
+        if input_data.ndim != 1:
+            raise ValueError("convolution expects one-dimensional input_data")
+        if kernel.ndim != 1:
+            raise ValueError("convolution expects a one-dimensional kernel")
+        if input_data.size == 0 or kernel.size == 0:
+            raise ValueError("convolution requires non-empty input_data and kernel")
 
         if padding > 0:
             input_data = np.pad(input_data, padding, mode="constant")
