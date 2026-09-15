@@ -1,46 +1,45 @@
-"""
-crystalline/kernels/__init__.py
-Tier 1 Kernels (CPU-based implementations)
+"""CPU kernel inventory for the published Tier 1 distribution.
 
-This module provides CPU-only kernel implementations suitable for Tier 1.
-GPU kernels are not available in this free edition.
+The inventory names operations that are actually implemented by
+:class:`crystalline.backend.CPUBackend`. It is an availability description,
+not a promise of higher-tier products or performance.
 """
 
-# Re-export from backend for convenience
 from crystalline.backend import CPUBackend
 
-# Tier 1 available kernels
+# Keep this list aligned with concrete CPUBackend methods. Public wrappers
+# may expose only a subset of these operations.
 AVAILABLE_KERNELS_TIER1 = [
     "spectral_analysis",
     "spectral_filtering",
     "convolution",
-    "correlation",
-    "fft",
-    "ifft",
+    "linear_algebra_solve",
     "matrix_multiply",
-    "matrix_solve",
-    "qr_decomposition",
-    "svd_decomposition",
 ]
 
-# Higher tier kernels (NOT AVAILABLE)
+# Features intentionally not implemented by this repository. The values are
+# factual availability reasons, not commercial tier/pricing promises.
 UNAVAILABLE_KERNELS_HIGHER_TIERS = {
-    "gpu_spectral_analysis": "Tier 2+",
-    "gpu_convolution": "Tier 2+",
-    "champion_mode": "Tier 4",
-    "jit_specialization": "Tier 4",
-    "domain_kernels": "Tier 3+",
+    "gpu_spectral_analysis": "not implemented in Tier 1",
+    "gpu_convolution": "not implemented in Tier 1",
+    "champion_mode": "not implemented",
+    "jit_specialization": "not implemented",
+    "domain_kernels": "not implemented",
 }
 
+
 def list_available_kernels():
-    """List all available kernels in Tier 1."""
-    return AVAILABLE_KERNELS_TIER1
+    """Return a copy of the implemented Tier 1 kernel names."""
+    return list(AVAILABLE_KERNELS_TIER1)
+
 
 def list_unavailable_kernels():
-    """List kernels available in higher tiers only."""
-    return UNAVAILABLE_KERNELS_HIGHER_TIERS
+    """Return a copy of the unavailable feature inventory."""
+    return dict(UNAVAILABLE_KERNELS_HIGHER_TIERS)
+
 
 __all__ = [
+    "CPUBackend",
     "AVAILABLE_KERNELS_TIER1",
     "UNAVAILABLE_KERNELS_HIGHER_TIERS",
     "list_available_kernels",
