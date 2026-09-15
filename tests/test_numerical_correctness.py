@@ -74,6 +74,23 @@ def test_spectral_filtering_matches_scipy():
     np.testing.assert_allclose(actual, expected, rtol=1e-13, atol=1e-13)
 
 
+def test_spectral_filtering_rejects_non_one_dimensional_input():
+    with np.testing.assert_raises(ValueError):
+        backend.spectral_filtering(np.ones((2, 32)), cutoff=0.2)
+
+
+def test_spectral_filtering_rejects_nonpositive_order():
+    data = np.ones(64)
+    for order in (0, -1, 2.5):
+        with np.testing.assert_raises(ValueError):
+            backend.spectral_filtering(data, cutoff=0.2, order=order)
+
+
+def test_spectral_filtering_rejects_too_short_signal():
+    with np.testing.assert_raises(ValueError):
+        backend.spectral_filtering(np.ones(3), cutoff=0.2, order=4)
+
+
 def test_convolution_stride_is_applied():
     data = np.arange(8, dtype=float)
     kernel = np.array([1.0, 2.0, 1.0])
@@ -95,6 +112,20 @@ def test_convolution_rejects_nonpositive_stride():
             pass
         else:
             raise AssertionError("stride must be a positive integer")
+
+
+def test_convolution_rejects_non_one_dimensional_input():
+    with np.testing.assert_raises(ValueError):
+        backend.convolution(np.ones((2, 4)), np.ones(3))
+    with np.testing.assert_raises(ValueError):
+        backend.convolution(np.ones(4), np.ones((2, 2)))
+
+
+def test_convolution_rejects_empty_inputs():
+    with np.testing.assert_raises(ValueError):
+        backend.convolution(np.array([]), np.ones(3))
+    with np.testing.assert_raises(ValueError):
+        backend.convolution(np.ones(3), np.array([]))
 
 
 def test_experimental_spectral_helper_matches_scipy():
