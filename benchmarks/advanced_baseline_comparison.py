@@ -17,6 +17,7 @@ import time
 import warnings
 
 import numpy as np
+import scipy
 from scipy import signal
 
 warnings.filterwarnings("ignore")
@@ -194,9 +195,7 @@ if __name__ == "__main__":
     print("Timing is environment-specific evidence, not a blanket performance claim.")
     print(f"Python: {sys.version.split()[0]}")
     print(f"NumPy: {np.__version__}")
-    print(f"SciPy: {signal.__version__ if hasattr(signal, '__version__') else 'see scipy.__version__'}")
-    import scipy
-    print(f"SciPy version: {scipy.__version__}")
+    print(f"SciPy: {scipy.__version__}")
     print(f"Platform: {platform.platform()}")
     print(f"Machine: {platform.machine()}")
     print(f"Random seed: {SEED}")
